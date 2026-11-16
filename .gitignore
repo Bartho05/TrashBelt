@@ -1,0 +1,21 @@
+# =====================================================================
+# Trashbelt — .gitignore
+# =====================================================================
+
+# Credenciais — NUNCA versionar
+api/credenciais.php
+.env
+.env.*
+
+# Dados locais gerados pelo backend (histórico de coletas + cache)
+api/storage/
+
+# Sistema / editores
+Thumbs.db
+.DS_Store
+desktop.ini
+.vscode/
+.idea/
+
+# Artefatos de compilação do Arduino
+arduino/**/build/

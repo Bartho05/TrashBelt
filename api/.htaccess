@@ -1,0 +1,17 @@
+# Apenas o endpoint público do backend pode ser acessado pelo navegador
+<Files "config.php">
+    Require all denied
+</Files>
+<Files "supabase.php">
+    Require all denied
+</Files>
+<Files "inserir-demo.php">
+    Require all denied
+</Files>
+# Credenciais (real e exemplo) ficam fora do alcance do navegador
+<FilesMatch "^credenciais">
+    Require all denied
+</FilesMatch>
+<Files "*.json">
+    Require all denied
+</Files>

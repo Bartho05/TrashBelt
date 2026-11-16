@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070b16">
+  <title>Trashbelt — Monitoramento de Resíduos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Aplica o tema salvo antes da primeira pintura (evita "flash") -->
+  <script>
+    try {
+      var t = localStorage.getItem("trashbelt-tema");
+      document.documentElement.dataset.theme = (t === "light") ? "light" : "dark";
+    } catch (e) {
+      document.documentElement.dataset.theme = "dark";
+    }
+  </script>
+
+  <link rel="stylesheet" href="css/style.css?v=6">
+</head>
+<body>
+  <!-- Sprite de ícones SVG (stroke via currentColor, herdam a cor do tema) -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <defs>
+      <symbol id="i-painel" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+      <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="14" rx="2"/><polyline points="6 13 9 9.5 12 12.5 15 8.5 18 11.5"/><path d="M12 18v3"/><path d="M8 21h8"/></symbol>
+      <symbol id="i-graficos" viewBox="0 0 24 24"><path d="M3 21h18"/><rect x="5" y="12" width="3.6" height="9" rx="1"/><rect x="10.2" y="6.5" width="3.6" height="14.5" rx="1"/><rect x="15.4" y="10" width="3.6" height="11" rx="1"/></symbol>
+      <symbol id="i-historico" viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><polyline points="12 7 12 12 15.5 14"/></symbol>
+      <symbol id="i-sino" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+      <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/></symbol>
+      <symbol id="i-lua" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></symbol>
+      <symbol id="i-papel" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+      <symbol id="i-plastico" viewBox="0 0 24 24"><path d="M10 2.5h4"/><path d="M10.5 2.5v3.2L8.5 9v11a1.8 1.8 0 0 0 1.8 1.8h3.4a1.8 1.8 0 0 0 1.8-1.8V9l-2-3.3V2.5"/><path d="M8.5 12.5h7"/></symbol>
+      <symbol id="i-vidro" viewBox="0 0 24 24"><path d="M7 3h10l-1.2 8.2a3.9 3.9 0 0 1-7.6 0z"/><path d="M12 15.2V21"/><path d="M8.5 21h7"/></symbol>
+      <symbol id="i-caixa" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+      <symbol id="i-reciclar" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+      <symbol id="i-lixeira" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
+      <symbol id="i-olho" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">T</div>
+        <div>
+          <strong>Trashbelt</strong>
+        </div>
+      </div>
+
+      <nav>
+        <p class="nav-label">PAINEL</p>
+        <button class="nav-item active" data-section="dashboard" title="Visão geral (tecla 1)"><svg class="icon"><use href="#i-painel"/></svg> Visão geral</button>
+        <button class="nav-item" data-section="monitor" title="Monitoramento (tecla 2)"><svg class="icon"><use href="#i-monitor"/></svg> Monitoramento</button>
+        <button class="nav-item" data-section="charts" title="Gráficos (tecla 3)"><svg class="icon"><use href="#i-graficos"/></svg> Gráficos</button>
+        <button class="nav-item" data-section="history" title="Histórico (tecla 4)"><svg class="icon"><use href="#i-historico"/></svg> Histórico</button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="system-status"><i></i><div><b>Sistema ativo</b><small>Sincronizando…</small></div></div>
+      </div>
+    </aside>
+    <div class="sidebar-backdrop"></div>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">TRASHBELT</p>
+          <h1 id="page-title">Visão geral</h1>
+        </div>
+        <div class="top-actions">
+          <span class="live"><i></i> AO VIVO</span>
+
+          <div class="notif-wrap">
+            <button class="icon-btn notif-btn" aria-label="Notificações" title="Últimas coletas">
+              <svg class="icon"><use href="#i-sino"/></svg><span class="notif-badge" hidden>0</span>
+            </button>
+            <div class="notif-panel" hidden>
+              <h4>Últimas coletas</h4>
+              <div class="notif-list">
+                <p class="notif-empty">Nenhuma coleta registrada ainda.</p>
+              </div>
+            </div>
+          </div>
+
+          <button class="theme-btn" aria-label="Alternar tema claro/escuro" title="Tema claro/escuro">
+            <svg class="icon i-sol"><use href="#i-sol"/></svg>
+            <svg class="icon i-lua"><use href="#i-lua"/></svg>
+          </button>
+          <div class="avatar">TB</div>
+          <button class="menu-btn" aria-label="Abrir menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+        </div>
+      </header>
+
+      <section id="dashboard" class="section active-section">
+        <div class="hero">
+          <div>
+            <span class="tag">MONITORAMENTO DA ESTEIRA</span>
+            <h2>Transformando resíduos<br><em>em dados.</em></h2>
+            <p>Acompanhe a coleta de resíduos dos rios de forma simples, visual e organizada.</p>
+            <div class="hero-cta-row">
+              <button class="hero-cta" data-goto="monitor"><svg class="icon"><use href="#i-olho"/></svg> Ver esteira ao vivo</button>
+              <span class="hero-note">Dados reais · atualiza a cada 10s</span>
+            </div>
+          </div>
+          <div class="hero-art">
+            <div class="water"></div>
+            <div class="belt-scene">
+              <div class="belt-rail"></div>
+              <div class="belt-surface"></div>
+              <div class="belt-rollers"></div>
+              <span class="belt-item t1"><svg class="icon"><use href="#i-papel"/></svg></span>
+              <span class="belt-item t2"><svg class="icon"><use href="#i-plastico"/></svg></span>
+              <span class="belt-item t3"><svg class="icon"><use href="#i-vidro"/></svg></span>
+              <span class="belt-item t4"><svg class="icon"><use href="#i-caixa"/></svg></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-head">
+          <div><h3>Resumo da coleta</h3><p>Dados registrados pela Trashbelt</p></div>
+          <span class="update">Sincronizando…</span>
+        </div>
+
+        <div class="cards">
+          <article class="stat-card total">
+            <div class="card-top"><span>Total coletado</span><b>—</b></div>
+            <strong><span class="num">—</span> <small>un</small></strong>
+            <div class="mini-progress"><span style="width:0%"></span></div>
+            <p>Meta mensal: —</p>
+          </article>
+          <article class="stat-card">
+            <div class="material-icon paper"><svg class="icon"><use href="#i-papel"/></svg></div>
+            <span class="stat-label">Papel</span>
+            <strong><span class="num">—</span> <small>un</small></strong>
+            <p>Aguardando dados</p>
+          </article>
+          <article class="stat-card">
+            <div class="material-icon plastic"><svg class="icon"><use href="#i-plastico"/></svg></div>
+            <span class="stat-label">Plástico</span>
+            <strong><span class="num">—</span> <small>un</small></strong>
+            <p>Aguardando dados</p>
+          </article>
+          <article class="stat-card">
+            <div class="material-icon glass"><svg class="icon"><use href="#i-vidro"/></svg></div>
+            <span class="stat-label">Vidro</span>
+            <strong><span class="num">—</span> <small>un</small></strong>
+            <p>Aguardando dados</p>
+          </article>
+        </div>
+
+        <div class="grid-2">
+          <article class="panel">
+            <div class="panel-head"><div><h3>Coleta por dia</h3><p>Últimos 7 dias · passe o mouse no gráfico</p></div><span class="unit">un</span></div>
+            <div class="line-chart">
+              <div class="y-labels"><span>—</span><span>—</span><span>—</span><span>—</span><span>0</span><span class="eixo">un</span></div>
+              <div class="chart-area">
+                <div class="gridline"></div><div class="gridline"></div><div class="gridline"></div><div class="gridline"></div><div class="gridline"></div>
+                <div class="guide-line" hidden></div>
+                <div class="avg-line" hidden><span></span></div>
+                <svg viewBox="0 0 700 250" preserveAspectRatio="none" aria-label="Gráfico de coleta por dia">
+                  <defs><linearGradient id="area" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#4f7cff" stop-opacity=".28"/><stop offset="100%" stop-color="#4f7cff" stop-opacity="0"/></linearGradient></defs>
+                  <path d="M0 190 L100 150 L200 172 L300 105 L400 128 L500 72 L600 90 L700 45 L700 250 L0 250Z" fill="url(#area)" opacity="1"/>
+                  <path d="M0 190 L100 150 L200 172 L300 105 L400 128 L500 72 L600 90 L700 45" fill="none" stroke="#5f8bff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <g fill="#0b1220" stroke="#5f8bff" stroke-width="4"><circle cx="0" cy="190" r="6"/><circle cx="100" cy="150" r="6"/><circle cx="200" cy="172" r="6"/><circle cx="300" cy="105" r="6"/><circle cx="400" cy="128" r="6"/><circle cx="500" cy="72" r="6"/><circle cx="600" cy="90" r="6"/><circle cx="700" cy="45" r="6"/></g>
+                </svg>
+                <div class="x-labels"><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head"><div><h3>Distribuição dos resíduos</h3><p>Passe o mouse nos materiais</p></div></div>
+            <div class="donut-wrap">
+              <div class="donut"><div><strong><span class="num">—</span></strong><small id="donut-sub">un total</small></div></div>
+              <div class="legend">
+                <div data-mat="papel"><i class="dot paper"></i><span>Papel</span><b>—</b></div>
+                <div data-mat="plastico"><i class="dot plastic"></i><span>Plástico</span><b>—</b></div>
+                <div data-mat="vidro"><i class="dot glass"></i><span>Vidro</span><b>—</b></div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="monitor" class="section">
+        <div class="section-head"><div><h3>Monitoramento dos resíduos</h3><p>Acompanhamento atual da coleta</p></div><span class="update">● Sincronizando</span></div>
+        <div class="monitor-grid">
+          <div class="monitor-main panel">
+            <div class="monitor-screen">
+              <div class="scan-line"></div>
+              <span class="river-label">RIO ÁREA DE COLETA</span>
+              <div class="monitor-belt">
+                <div class="belt-rail"></div>
+                <div class="belt-surface"></div>
+                <div class="belt-rollers"></div>
+                <span class="belt-item t1"><svg class="icon"><use href="#i-papel"/></svg></span>
+                <span class="belt-item t2"><svg class="icon"><use href="#i-plastico"/></svg></span>
+                <span class="belt-item t3"><svg class="icon"><use href="#i-vidro"/></svg></span>
+                <span class="belt-item t4"><svg class="icon"><use href="#i-caixa"/></svg></span>
+                <span class="belt-item t5"><svg class="icon"><use href="#i-reciclar"/></svg></span>
+              </div>
+              <div class="drop-bins">
+                <div class="bin bin-papel" style="--i:0" title="Lixeira de papel"><svg class="icon"><use href="#i-lixeira"/></svg></div>
+                <div class="bin bin-plastic" style="--i:1" title="Lixeira de plástico"><svg class="icon"><use href="#i-lixeira"/></svg></div>
+                <div class="bin bin-glass" style="--i:2" title="Lixeira de vidro"><svg class="icon"><use href="#i-lixeira"/></svg></div>
+              </div>
+              <div class="floating-data"><span>COLETA</span><b>— un/h</b></div>
+            </div>
+          </div>
+          <div class="panel sensor-card"><span class="tag">STATUS</span><h3>Sensores</h3><div class="sensor"><i class="off"></i><span>Esteira</span><b>Aguardando</b></div><div class="sensor"><i class="off"></i><span>Separação</span><b>Aguardando</b></div><div class="sensor"><i class="off"></i><span>Coleta</span><b>Aguardando</b></div><div class="sensor"><i class="off"></i><span>Manutenção</span><b>Sem dados</b></div></div>
+        </div>
+      </section>
+
+      <section id="charts" class="section">
+        <div class="section-head"><div><h3>Gráficos</h3><p>Visualização dos dados de coleta · passe o mouse nas barras</p></div></div>
+        <div class="chart-cards">
+          <article class="panel big-chart"><div class="panel-head"><div><h3>Quantidade de resíduos coletados</h3><p id="period-description">Por dia</p></div><div class="period-tabs" role="tablist" aria-label="Período do gráfico"><button class="period-tab active" data-period="dia" type="button">Dia</button><button class="period-tab" data-period="semana" type="button">Semana</button><button class="period-tab" data-period="mes" type="button">Mês</button></div></div><div class="period-summary"><strong id="period-total"><span class="num">—</span></strong><span>un no período exibido</span></div><div class="bars empty-bars" id="period-bars"><div><i style="height:0%"></i><span>—</span></div><div><i style="height:0%"></i><span>—</span></div><div><i style="height:0%"></i><span>—</span></div><div><i style="height:0%"></i><span>—</span></div><div><i style="height:0%"></i><span>—</span></div><div><i style="height:0%"></i><span>—</span></div><div><i style="height:0%"></i><span>—</span></div></div><div class="stack-legend"><span><i class="sd pa"></i>Papel</span><span><i class="sd pl"></i>Plástico</span><span><i class="sd v"></i>Vidro</span></div><p class="chart-empty" id="period-empty">Aguardando dados da esteira para exibir as coletas por dia.</p></article>
+          <article class="panel"><div class="panel-head"><div><h3>Comparação</h3><p>Papel × plástico × vidro</p></div></div><div class="compare"><div><span>Papel</span><div><i style="width:0%"></i></div><b>—</b></div><div><span>Plástico</span><div><i style="width:0%"></i></div><b>—</b></div><div><span>Vidro</span><div><i style="width:0%"></i></div><b>—</b></div></div></article>
+        </div>
+      </section>
+
+      <section id="history" class="section">
+        <div class="section-head"><div><h3>Histórico de coletas</h3><p>Clique nos títulos para ordenar</p></div>
+          <select class="filter-select" aria-label="Filtrar por material">
+            <option value="todos">Material: Todos</option>
+            <option value="papel">Material: Papel</option>
+            <option value="plastico">Material: Plástico</option>
+            <option value="vidro">Material: Vidro</option>
+          </select>
+        </div>
+        <div class="panel table-panel">
+          <div class="table-scroll">
+            <table><thead><tr><th data-key="data" title="Ordenar por data">Data</th><th data-key="horario" title="Ordenar por horário">Horário</th><th data-key="material" title="Ordenar por material">Material</th><th data-key="quantidadeUn" title="Ordenar por quantidade">Quantidade</th><th data-key="status" title="Ordenar por status">Status</th></tr></thead>
+            <tbody><tr><td colspan="5" class="empty-history">Nenhum registro disponível. Aguardando dados da esteira.</td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <footer><span>TRASHBELT • 2026</span><span>Monitoramento de resíduos</span><span class="atalhos">Atalhos: 1 · 2 · 3 · 4 · T</span></footer>
+    </main>
+  </div>
+
+  <div class="tooltip" id="tooltip" hidden></div>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="js/app.js?v=6"></script>
+</body>
+</html>

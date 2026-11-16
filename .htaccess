@@ -1,0 +1,11 @@
+# =====================================================================
+# Trashbelt — proteções gerais da raiz do site (Apache/XAMPP)
+# =====================================================================
+
+# Bloqueia arquivos ocultos (.gitignore, .env, .htaccess em si etc.)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Bloqueia qualquer acesso à pasta do repositório git
+RedirectMatch 404 /\.git
