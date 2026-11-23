@@ -605,6 +605,14 @@ html[data-theme="light"] .unit { color: #3157c8 }
     position: absolute; inset: 0;
     width: 100%; height: 100%;
     display: block;
+    overflow: visible;
+}
+
+/* Área do gráfico de linha: altura responsiva, nunca colapsa */
+.chart-area {
+    position: relative;
+    height: 250px;
+    min-height: 180px;
 }
 .line-chart path[fill="none"] {
     stroke: #5f8bff;
@@ -849,7 +857,15 @@ html[data-theme="light"] .sensor i.off { background: #b3bdd4 }
 .bar-stack i.pl { background: linear-gradient(180deg, #4fd0a8, #2aa383) }
 .bar-stack i.v  { background: linear-gradient(180deg, #f5c87e, #d99b3f) }
 
-.bar-col > span { font-size: 10.5px; color: var(--muted-2); font-family: var(--font-num) }
+.bar-col > span {
+    font-size: 10.5px;
+    color: var(--muted-2);
+    font-family: var(--font-num);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 4px;
+}
 
 .empty-bars .bar-stack { opacity: .45 }
 

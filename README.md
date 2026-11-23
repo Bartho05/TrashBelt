@@ -178,6 +178,37 @@ C:\xampp\php\php.exe api\inserir-demo.php 5        # +5 un
 C:\xampp\php\php.exe api\inserir-demo.php --loop   # 1 un a cada 15s
 ```
 
+## 🚀 Deploy na Vercel
+
+O front-end é estático (HTML/CSS/JS) e roda direto na Vercel. O back-end usa uma **serverless function** (`api/dashboard.js`) que lê o Supabase com a chave secreta guardada nas Environment Variables da Vercel.
+
+### 1. Prepare o repositório
+Certifique-se de que estes arquivos estão no Git:
+- `vercel.json` — rotas da Vercel
+- `api/dashboard.js` — serverless function (substitui o PHP em produção)
+- `.env.example` — modelo de variáveis de ambiente (não commite o `.env` real)
+
+### 2. Conecte no Vercel
+1. Acesse [vercel.com](https://vercel.com), importe o repositório `Bartho05/TrashBelt`.
+2. Em **Settings → Environment Variables**, adicione:
+   - `SUPABASE_URL` — `https://<seu-projeto>.supabase.co`
+   - `SUPABASE_SECRET_KEY` — a chave secreta do Supabase (*Project Settings → API Keys*)
+3. Faça o deploy. A Vercel detecta o `vercel.json` e expõe `/api/dashboard`.
+
+### 3. Banco (Supabase)
+Execute `docs/tabelas.sql` no SQL Editor do Supabase para criar as tabelas e travas de segurança.
+
+### 4. Diferença local vs produção
+| | Local (XAMPP) | Produção (Vercel) |
+|---|---|---|
+| Endpoint | `api/dashboard.php` | `api/dashboard` (serverless) |
+| Backend | PHP + cURL | Node.js + fetch |
+| Chave secreta | `api/credenciais.php` | Environment Variables da Vercel |
+
+O `js/app.js` detecta automaticamente se está em `localhost` e usa a URL correta.
+
+---
+
 ### Firmware (ESP32)
 
 1. No Arduino IDE, instale a placa `esp32 by Espressif Systems` (Boards Manager) e as bibliotecas `Adafruit TCS34725` e `ESP32Servo` (Library Manager)

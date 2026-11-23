@@ -859,14 +859,21 @@ document.querySelectorAll(".legend > div[data-mat]").forEach(row => {
 });
 
 /* ---------- Integração com o backend ---------- */
-// Consulta api/dashboard.php a cada 10 segundos.
-// O backend PHP lê o Supabase com a chave secreta (protegida no servidor).
+// Consulta o endpoint de dashboard a cada 10 segundos.
+// Local (XAMPP):   api/dashboard.php
+// Produção (Vercel): api/dashboard  (serverless function)
+// O backend lê o Supabase com a chave secreta (protegida no servidor).
+// O navegador nunca tem acesso a nenhuma chave.
+
+const API_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? "api/dashboard.php"
+    : "api/dashboard";
 
 let falhasSeguidas = 0;
 
 async function loadDashboard() {
   try {
-    const res = await fetch("api/dashboard.php", { headers: { Accept: "application/json" } });
+    const res = await fetch(API_URL, { headers: { Accept: "application/json" } });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (!data || typeof data !== "object" || data.erro) {
