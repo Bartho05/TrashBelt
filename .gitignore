@@ -19,3 +19,6 @@ desktop.ini
 
 # Artefatos de compilação do Arduino
 arduino/**/build/
+
+# Vercel
+.vercel/

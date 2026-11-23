@@ -247,6 +247,7 @@ html[data-theme="light"] .nav-item.active { color: #3157c8 }
 }
 
 .menu-btn { display: none; width: 40px; height: 40px; font-size: 17px }
+.menu-btn .icon { pointer-events: none }
 
 .avatar {
     width: 38px; height: 38px;
