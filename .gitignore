@@ -1,13 +1,14 @@
 # =====================================================================
-# Trashbelt — .gitignore
+# Trashbelt - .gitignore
 # =====================================================================
 
-# Credenciais — NUNCA versionar
+# Credenciais - NUNCA versionar
 api/credenciais.php
 .env
 .env.*
+!.env.example
 
-# Dados locais gerados pelo backend (histórico de coletas + cache)
+# Dados locais gerados pelo backend (historico de coletas + cache)
 api/storage/
 
 # Sistema / editores
@@ -17,7 +18,7 @@ desktop.ini
 .vscode/
 .idea/
 
-# Artefatos de compilação do Arduino
+# Artefatos de compilacao do Arduino
 arduino/**/build/
 
 # Vercel

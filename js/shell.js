@@ -24,15 +24,26 @@
     lua: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
   };
 
+  // A raiz vem do próprio <script>: funciona na landing, em /pages/ e também
+  // quando a Vercel reescreve /dashboard.html para /pages/dashboard.html.
+  const scriptTag = document.currentScript || document.querySelector('script[src*="shell.js"]');
+  const SITE = scriptTag
+    ? new URL(".", scriptTag.src).href.replace(/\/js\/$/, "/")
+    : ((location.hostname === "localhost" || location.hostname === "127.0.0.1") ? "/Trashbelt/" : "/");
+  const APP = SITE + "pages/";
+  const LANDING = SITE + "index.html";
+  const LOCAL = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  const API = SITE + (LOCAL ? "api/dashboard.php" : "api/dashboard");
+
   const page = (location.pathname.split("/").pop() || "index.html").replace(".html", "");
   const isLanding = page === "" || page === "index";
 
   const navItems = [
-    { href: "index.html", label: "Início", icon: "casa", key: "index" },
-    { href: "dashboard.html", label: "Visão geral", icon: "chart", key: "dashboard" },
-    { href: "monitor.html", label: "Monitoramento", icon: "monitor", key: "monitor" },
-    { href: "charts.html", label: "Gráficos", icon: "chart", key: "charts" },
-    { href: "history.html", label: "Histórico", icon: "history", key: "history" }
+    { href: LANDING, label: "Início", icon: "casa", key: "index" },
+    { href: APP + "dashboard.html", label: "Visão geral", icon: "chart", key: "dashboard" },
+    { href: APP + "monitor.html", label: "Monitoramento", icon: "monitor", key: "monitor" },
+    { href: APP + "charts.html", label: "Gráficos", icon: "chart", key: "charts" },
+    { href: APP + "history.html", label: "Histórico", icon: "history", key: "history" }
   ];
 
   function icon(name, cls) {
@@ -84,7 +95,7 @@
     header.className = "landing-nav";
     header.innerHTML = `
       <div class="nav-inner">
-        <a class="landing-brand" href="index.html" aria-label="Trashbelt — início">
+        <a class="landing-brand" href="${LANDING}" aria-label="Trashbelt — início">
           <span class="brand-mark">T</span>
           <span>Trashbelt</span>
         </a>
@@ -94,7 +105,7 @@
         </nav>
         <div class="landing-actions">
           ${botaoTema()}
-          <a class="btn btn-primary btn-dashboard" href="dashboard.html">
+          <a class="btn btn-primary btn-dashboard" href="${APP}dashboard.html">
             Dashboard ${icon("seta")}
           </a>
         </div>
@@ -126,7 +137,7 @@
         <div class="nav-label">Navegação</div>
         ${links}
         <div class="nav-label">Projeto</div>
-        <a class="side-link" href="index.html">${icon("casa")}<span>Landing page</span></a>
+        <a class="side-link" href="${LANDING}">${icon("casa")}<span>Landing page</span></a>
         <a class="side-link" href="https://github.com/Bartho05/TrashBelt" target="_blank" rel="noopener noreferrer">
           ${icon("external")}<span>GitHub</span>${icon("external", "link-ext")}
         </a>
@@ -196,9 +207,9 @@
         </div>
         <div class="footer-col">
           <h4>Recursos</h4>
-          <a href="dashboard.html">Painel de dados</a>
-          <a href="charts.html">Análises</a>
-          <a href="monitor.html">Tempo real</a>
+          <a href="${APP}dashboard.html">Painel de dados</a>
+          <a href="${APP}charts.html">Análises</a>
+          <a href="${APP}monitor.html">Tempo real</a>
           <a href="https://github.com/Bartho05/TrashBelt" target="_blank" rel="noopener noreferrer">Código-fonte ↗</a>
         </div>
       </div>
@@ -220,10 +231,7 @@
   function initLanding() {
     const total = document.getElementById("hero-total");
     if (!total) return;
-    const fetchUrl = location.hostname === "localhost" || location.hostname === "127.0.0.1"
-      ? "api/dashboard.php" : "api/dashboard";
-
-    fetch(fetchUrl, { cache: "no-store" })
+    fetch(API, { cache: "no-store" })
       .then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))
       .then(data => {
         const valor = Number(data.totalUn ?? 0);

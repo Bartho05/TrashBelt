@@ -969,6 +969,14 @@ html[data-theme="light"] .i-lua { display: block }
     flex-wrap: wrap;
 }
 
+.history-count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
 .filter-select {
     padding: 0.6rem 1rem;
     border-radius: 10px;
@@ -987,17 +995,23 @@ html[data-theme="light"] .i-lua { display: block }
 }
 
 .table-wrap {
-    overflow-x: auto;
+    overflow: auto;
+    max-height: 68vh;
     border-radius: var(--radius-lg);
     box-shadow: var(--glass-shadow), var(--glass-highlight);
 }
 
-.table-wrap.panel { padding: 0; overflow: hidden }
+.table-wrap.panel { padding: 0; overflow: auto }
 
 table { width: 100%; border-collapse: collapse; font-size: 0.86rem }
 
 th {
-    background: rgba(127, 145, 180, 0.07);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bg-panel);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     color: var(--text-secondary);
     font-size: 0.68rem;
     font-weight: 700;
@@ -1026,6 +1040,7 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
 
 .material-cell { display: flex; align-items: center; gap: 0.65rem }
 .material-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0 }
+.material-dot.papel,
 .material-dot.paper { background: var(--papel); box-shadow: 0 0 8px var(--papel) }
 .material-dot.plastico { background: var(--plastico); box-shadow: 0 0 8px var(--plastico) }
 .material-dot.vidro { background: var(--vidro); box-shadow: 0 0 8px var(--vidro) }
@@ -1689,23 +1704,6 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
 
 .preview-mat b { font-family: var(--font-mono); font-size: 1.02rem }
 
-.float-chip {
-    position: absolute;
-    padding: 0.55rem 0.85rem;
-    border-radius: 11px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    box-shadow: var(--shadow-md);
-    background: var(--glass-bg);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    white-space: nowrap;
-}
-
-.float-chip.one { top: -1.1rem; right: -1rem; color: var(--success) }
-.float-chip.two { bottom: -1.1rem; left: -1.4rem; color: var(--primary) }
-
 .section { padding: 3.2rem 0 }
 .section-head { margin-bottom: 1.9rem }
 
@@ -1816,9 +1814,6 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
     .stat-card.total { grid-column: 1 / -1 }
     .hero { grid-template-columns: 1fr; gap: 2.2rem; padding-top: 2rem }
     .hero-visual { max-width: 540px }
-    /* O hero empilha aqui: os chips não podem ultrapassar o card. */
-    .float-chip.one { right: 0 }
-    .float-chip.two { left: 0 }
 }
 
 /* Sidebar vira drawer: funciona no celular de verdade */

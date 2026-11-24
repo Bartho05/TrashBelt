@@ -143,9 +143,14 @@ function toast(titulo, corpo, tipo = "success") {
 }
 
 /* ---------- Dados do backend ---------- */
-const API_URL = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+// Descobre a raiz pelo <script>, então funciona tanto na raiz quanto em /pages/.
+const APP_SCRIPT = document.currentScript || document.querySelector('script[src*="app.js"]');
+const SITE_URL = APP_SCRIPT
+    ? new URL(".", APP_SCRIPT.src).href.replace(/\/js\/$/, "/")
+    : ((location.hostname === "localhost" || location.hostname === "127.0.0.1") ? "/Trashbelt/" : "/");
+const API_URL = SITE_URL + ((location.hostname === "localhost" || location.hostname === "127.0.0.1")
     ? "api/dashboard.php"
-    : "api/dashboard";
+    : "api/dashboard");
 
 let falhasSeguidas = 0;
 let registrosAtuais = [];
@@ -330,6 +335,14 @@ function renderHistorico() {
   const filtrados = filtroHistorico === "todos"
     ? [...registrosAtuais]
     : registrosAtuais.filter(r => String(r.material || "").toLowerCase().startsWith(prefixo));
+
+  const contador = document.getElementById("historico-contador");
+  if (contador) {
+    const total = registrosAtuais.length;
+    contador.textContent = filtroHistorico === "todos"
+      ? total + (total === 1 ? " registro" : " registros")
+      : filtrados.length + " de " + total + " registros";
+  }
 
   if (sortState.key) {
     const { key, dir } = sortState;

@@ -81,15 +81,16 @@ Uma esteira equipada com ESP32, sensor de cores TCS34725, três servomotores e s
 ```
 Trashbelt/
 ├── index.html                  # Landing page (apresentação + resumo ao vivo)
-├── dashboard.html              # Visão geral: cards, linha, rosca e barras
-├── monitor.html                # Esteira animada e status dos sensores
-├── charts.html                 # Gráficos e comparação por material
-├── history.html                # Tabela filtrável e ordenável
+├── pages/                      # Painel (páginas independentes)
+│   ├── dashboard.html          # Visão geral: cards, linha, rosca e barras
+│   ├── monitor.html            # Esteira animada e status dos sensores
+│   ├── charts.html             # Gráficos e comparação por material
+│   └── history.html            # Tabela filtrável e ordenável
 ├── css/style.css               # Estilos, temas, sidebar e glassmorphism
 ├── js/app.js                   # Dados, gráficos, tooltips e temas (somente painel)
 ├── js/shell.js                 # Navbar da landing, sidebar/drawer do painel e rodapé
-├── vercel.json                 # Rotas e build da Vercel
-├── .env.example                # Modelo das variáveis de ambiente
+├── vercel.json                 # Rotas e build da Vercel (URLs antigas continuam funcionando)
+├── .env.example                # Modelo das variáveis de ambiente (versionado)
 ├── api/
 │   ├── dashboard.php           # Endpoint público (JSON, cache de 5s)
 │   ├── supabase.php            # Cliente REST do Supabase (cURL)
