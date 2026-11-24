@@ -116,20 +116,34 @@ navItems.forEach(item => {
   });
 });
 
-/* Menu mobile */
-const menuBtn = document.querySelector(".menu-btn");
-const sidebar = document.querySelector(".sidebar");
-const backdrop = document.querySelector(".sidebar-backdrop");
-menuBtn?.addEventListener("click", () => {
+/* Menu mobile — toggle direto via onclick no HTML */
+function toggleMenu() {
   const isOpen = document.body.classList.toggle("menu-open");
-  sidebar?.classList.toggle("open", isOpen);
-  if (sidebar) sidebar.style.transform = isOpen ? "none" : "translateX(-100%)";
+  const sidebar = document.querySelector(".sidebar");
+  const backdrop = document.querySelector(".sidebar-backdrop");
+  if (sidebar) {
+    sidebar.classList.toggle("open", isOpen);
+    sidebar.style.transform = isOpen ? "none" : "translateX(-100%)";
+  }
   if (backdrop) {
     backdrop.style.opacity = isOpen ? "1" : "0";
     backdrop.style.pointerEvents = isOpen ? "auto" : "none";
   }
-});
-backdrop?.addEventListener("click", closeMenu);
+}
+
+function closeMenu() {
+  document.body.classList.remove("menu-open");
+  const sidebar = document.querySelector(".sidebar");
+  const backdrop = document.querySelector(".sidebar-backdrop");
+  if (sidebar) {
+    sidebar.classList.remove("open");
+    sidebar.style.transform = "translateX(-100%)";
+  }
+  if (backdrop) {
+    backdrop.style.opacity = "0";
+    backdrop.style.pointerEvents = "none";
+  }
+}
 
 /* Botão do hero */
 document.querySelectorAll("[data-goto]").forEach(btn => {

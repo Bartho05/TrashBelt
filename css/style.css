@@ -977,17 +977,11 @@ footer {
 }
 
 @media (max-width: 920px) {
-    .menu-btn { display: grid }
-    .sidebar {
-        left: 0;
-        transform: translateX(-100%);
-        width: 276px;
-        box-shadow: 30px 0 80px rgba(2, 6, 16, .6);
-        z-index: 25;
-    }
-    .sidebar.open { transform: none }
-    body.menu-open .sidebar-backdrop { opacity: 1; pointer-events: auto }
-    .main { margin-left: 0; width: 100% }
+    .menu-btn { display: grid !important; z-index: 30 !important; pointer-events: auto !important }
+    .sidebar { left: 0 !important; transform: translateX(-100%) !important; width: 276px !important; position: fixed !important; top: 0 !important; bottom: 0 !important; z-index: 25 !important; box-shadow: 30px 0 80px rgba(2, 6, 16, .6) !important }
+    .sidebar.open { transform: none !important }
+    body.menu-open .sidebar-backdrop { opacity: 1 !important; pointer-events: auto !important }
+    .main { margin-left: 0 !important; width: 100% !important }
 }
 
 @media (max-width: 640px) {
