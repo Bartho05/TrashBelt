@@ -117,8 +117,11 @@ navItems.forEach(item => {
 });
 
 /* Menu mobile */
-document.querySelector(".menu-btn")?.addEventListener("click", () => {
-  document.body.classList.toggle("menu-open");
+const menuBtn = document.querySelector(".menu-btn");
+const sidebar = document.querySelector(".sidebar");
+menuBtn?.addEventListener("click", () => {
+  const isOpen = document.body.classList.toggle("menu-open");
+  sidebar?.classList.toggle("open", isOpen);
 });
 document.querySelector(".sidebar-backdrop")?.addEventListener("click", closeMenu);
 
