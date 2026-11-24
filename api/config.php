@@ -6,8 +6,9 @@
  * As chaves são lidas, nesta ordem:
  *   1. api/credenciais.php   — arquivo local fora do versionamento
  *                              (veja credenciais.exemplo.php);
- *   2. Variáveis de ambiente — SUPABASE_URL, SUPABASE_SECRET_KEY,
- *                              SUPABASE_ANON_KEY.
+ *   2. .env na raiz          — cópia de .env.example, também fora do Git;
+ *   3. Variáveis de ambiente — SUPABASE_URL, SUPABASE_SECRET_KEY,
+ *                              SUPABASE_ANON_KEY (é o que a Vercel usa).
  */
 
 // Bloqueia acesso direto pelo navegador (só pode ser "require"-do por outro script)
@@ -21,6 +22,34 @@ if (count(get_included_files()) === 1) {
 $caminhoCredenciais = __DIR__ . '/credenciais.php';
 if (is_file($caminhoCredenciais)) {
     require $caminhoCredenciais;
+}
+
+// Fallback: .env da raiz (somente se credenciais.php não definiu as constantes)
+if (!defined('SUPABASE_URL') || !defined('SUPABASE_SECRET_KEY')) {
+    $caminhoEnv = __DIR__ . '/../.env';
+    if (is_file($caminhoEnv)) {
+        $linhasEnv = file($caminhoEnv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($linhasEnv as $linhaEnv) {
+            $linhaEnv = trim($linhaEnv);
+            if ($linhaEnv === '' || $linhaEnv[0] === '#' || strpos($linhaEnv, '=') === false) {
+                continue;
+            }
+            [$chaveEnv, $valorEnv] = explode('=', $linhaEnv, 2);
+            $chaveEnv = trim($chaveEnv);
+            $valorEnv = trim($valorEnv);
+            // Remove aspas simples/duplas envolvendo o valor
+            if (strlen($valorEnv) >= 2
+                && (($valorEnv[0] === '"' && substr($valorEnv, -1) === '"')
+                    || ($valorEnv[0] === "'" && substr($valorEnv, -1) === "'"))) {
+                $valorEnv = substr($valorEnv, 1, -1);
+            }
+            // Variável de ambiente real tem prioridade sobre o arquivo
+            if ($chaveEnv !== '' && getenv($chaveEnv) === false) {
+                putenv($chaveEnv . '=' . $valorEnv);
+                $_ENV[$chaveEnv] = $valorEnv;
+            }
+        }
+    }
 }
 
 // Fallback: variáveis de ambiente (servidores com deploy próprio)

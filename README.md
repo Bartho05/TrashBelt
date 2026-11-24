@@ -180,7 +180,11 @@ Páginas: landing (`/`), visão geral (`/dashboard.html`), monitoramento (`/moni
 
 1. Instale o **XAMPP** (Apache + PHP 8)
 2. No SQL Editor do Supabase, execute o script `docs/tabelas.sql`
-3. Copie `api/credenciais.exemplo.php` para `api/credenciais.php` e preencha as chaves (Supabase → *Project Settings → API Keys*)
+3. Configure as chaves (Supabase → *Project Settings → API Keys*) de um dos dois jeitos:
+   - copie `.env.example` para `.env` na raiz e preencha; **ou**
+   - copie `api/credenciais.exemplo.php` para `api/credenciais.php` e preencha.
+   
+   Se os dois existirem, `api/credenciais.php` tem prioridade. Nenhum dos dois vai para o Git.
 4. Coloque a pasta em `htdocs` (ex.: `C:\xampp\htdocs\Trashbelt`) e abra `http://localhost/Trashbelt/`
 
 Simulador de coletas (sem hardware):
@@ -216,7 +220,7 @@ Execute `docs/tabelas.sql` no SQL Editor do Supabase para criar as tabelas e tra
 |---|---|---|
 | Endpoint | `api/dashboard.php` | `api/dashboard` (serverless) |
 | Backend | PHP + cURL | Node.js + fetch |
-| Chave secreta | `api/credenciais.php` | Environment Variables da Vercel |
+| Chave secreta | `.env` ou `api/credenciais.php` | Environment Variables da Vercel |
 
 O `js/app.js` detecta automaticamente se está em `localhost` e usa a URL correta.
 
