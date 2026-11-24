@@ -233,7 +233,8 @@ function statusSensores(minutosDesdeLeitura) {
 }
 
 /* ---------- Handler principal ---------- */
-export default async function handler(req, res) {
+// CommonJS: funciona no runtime padrão do @vercel/node sem precisar de package.json.
+module.exports = async function handler(req, res) {
   if (req.method !== 'GET') {
     res.status(405).setHeader('Allow', 'GET').setHeader('Content-Type', 'application/json');
     return res.json({ erro: 'Método não permitido' });
