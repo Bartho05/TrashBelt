@@ -1863,8 +1863,9 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
     .chart-plot { left: 36px }
     .x-labels { left: 36px; font-size: 0.66rem }
     .y-labels { width: 32px; font-size: 0.66rem }
-    /* O texto SVG distorce com preserveAspectRatio="none" em telas estreitas */
-    .line-chart-wrap .max-label { display: none }
+    /* O viewBox agora acompanha o painel; só ajusta a escala do texto e da área */
+    .line-chart-wrap .max-label { font-size: 11px }
+    .line-chart-wrap path.area-path { opacity: 0.55 }
     .donut-wrap { flex-direction: column; gap: 1.2rem }
     .donut { width: 165px; height: 165px }
     .donut-legend { width: 100% }

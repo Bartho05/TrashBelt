@@ -384,6 +384,7 @@ function renderHistorico() {
 let coordsGrafico = [];
 let labelsGrafico = [];
 let linePoints = [];
+let dimGrafico = { w: 700, h: 200 };
 
 /** No celular, "17/11" vira "17": os 7 rótulos passam a caber sem se sobrepor. */
 const consultaMobile = typeof window.matchMedia === "function"
@@ -406,14 +407,22 @@ function aplicarRotulosEixoX() {
   });
 }
 
-// Atualiza o formato dos rótulos ao girar o celular ou redimensionar a janela
-window.addEventListener("resize", aplicarRotulosEixoX, { passive: true });
-window.addEventListener("orientationchange", aplicarRotulosEixoX, { passive: true });
+// Recalcula rótulos e geometria ao girar o celular ou redimensionar a janela
+let timerRedimensionar = 0;
+function aoRedimensionar() {
+  clearTimeout(timerRedimensionar);
+  timerRedimensionar = setTimeout(() => {
+    if (linePoints.length) updateDailyChart(linePoints);
+    else aplicarRotulosEixoX();
+  }, 80);
+}
+window.addEventListener("resize", aoRedimensionar, { passive: true });
+window.addEventListener("orientationchange", aoRedimensionar, { passive: true });
 if (consultaMobile) {
   if (typeof consultaMobile.addEventListener === "function") {
-    consultaMobile.addEventListener("change", aplicarRotulosEixoX);
+    consultaMobile.addEventListener("change", aoRedimensionar);
   } else if (typeof consultaMobile.addListener === "function") {
-    consultaMobile.addListener(aplicarRotulosEixoX); // Safari antigo
+    consultaMobile.addListener(aoRedimensionar); // Safari antigo
   }
 }
 
@@ -423,10 +432,15 @@ document.addEventListener("touchstart", (e) => {
   if (!alvo) esconderTooltip();
 }, { passive: true });
 
-/** Linha reta entre os pontos: curvas suaves ultrapassam o zero em dias com pico isolado */
-function caminhoLinear(pts) {
+/** Degraus: contagens diárias são discretas, então uma reta entre 0 e um pico
+ *  criava uma rampa enganosa. Curvas suaves, além disso, ultrapassam o zero. */
+function caminhoDegraus(pts) {
   if (!pts.length) return "";
-  return "M" + pts.map(([x, y]) => x.toFixed(1) + " " + y.toFixed(1)).join(" L");
+  let d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
+  for (let i = 1; i < pts.length; i++) {
+    d += " H" + pts[i][0].toFixed(1) + " V" + pts[i][1].toFixed(1);
+  }
+  return d;
 }
 
 function updateDailyChart(points) {
@@ -446,14 +460,21 @@ function updateDailyChart(points) {
 
   const svg = document.querySelector(".line-chart-wrap svg");
   if (!svg) return;
-  const width = 700;
-  const height = 200;
+  const plot = document.querySelector(".chart-plot");
+  const rect = plot ? plot.getBoundingClientRect() : null;
+  // viewBox com o tamanho real do painel: círculos redondos e texto legível no celular
+  const width = rect && rect.width > 10 ? Math.round(rect.width) : 700;
+  const height = rect && rect.height > 10 ? Math.round(rect.height) : 200;
+  dimGrafico = { w: width, h: height };
+  svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+
+  const mobile = consultaMobile && consultaMobile.matches;
   coordsGrafico = values.map((v, i) => {
-    const x = values.length === 1 ? 0 : (i / (values.length - 1)) * width;
+    const x = values.length === 1 ? width / 2 : (i / (values.length - 1)) * width;
     const y = height - (v / topo) * (height - 25);
     return [x, y];
   });
-  const linha = caminhoLinear(coordsGrafico);
+  const linha = caminhoDegraus(coordsGrafico);
   const paths = svg.querySelectorAll("path");
   if (paths[0]) paths[0].setAttribute("d", linha + " L" + width + " " + height + " L0 " + height + "Z");
   if (paths[1]) paths[1].setAttribute("d", linha);
@@ -467,10 +488,10 @@ function updateDailyChart(points) {
       const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       c.setAttribute("cx", x);
       c.setAttribute("cy", y);
-      c.setAttribute("r", i === idxMax ? 8 : 6);
+      c.setAttribute("r", i === idxMax ? (mobile ? 6 : 8) : (mobile ? 4 : 6));
       c.style.fill = i === idxMax ? "var(--success)" : "var(--bg-panel)";
       c.style.stroke = i === idxMax ? "var(--success)" : "var(--primary)";
-      c.setAttribute("stroke-width", i === idxMax ? 3 : 2);
+      c.setAttribute("stroke-width", mobile ? 2 : (i === idxMax ? 3 : 2));
       c.setAttribute("class", i === idxMax ? "max-dot" : "");
       circlesGroup.appendChild(c);
     });
@@ -479,8 +500,8 @@ function updateDailyChart(points) {
       const [mx, my] = coordsGrafico[idxMax];
       const rotulo = document.createElementNS("http://www.w3.org/2000/svg", "text");
       rotulo.setAttribute("x", mx.toFixed(1));
-      rotulo.setAttribute("y", (my - 16).toFixed(1));
-      rotulo.setAttribute("text-anchor", mx < 40 ? "start" : (mx > width - 40 ? "end" : "middle"));
+      rotulo.setAttribute("y", (my - (mobile ? 12 : 16)).toFixed(1));
+      rotulo.setAttribute("text-anchor", mx < 30 ? "start" : (mx > width - 30 ? "end" : "middle"));
       rotulo.setAttribute("class", "max-label");
       rotulo.textContent = maior.toLocaleString("pt-BR") + " un";
       circlesGroup.appendChild(rotulo);
@@ -519,8 +540,8 @@ function updateDailyChart(points) {
       const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
       const idx = Math.round(ratio * (coordsGrafico.length - 1));
       const [x, y] = coordsGrafico[idx];
-      const px = (x / 700) * rect.width;
-      const py = (y / 200) * rect.height;
+      const px = (x / dimGrafico.w) * rect.width;
+      const py = (y / dimGrafico.h) * rect.height;
       guide.style.display = "block";
       guide.style.left = px + "px";
       hoverDot.style.left = px + "px";
