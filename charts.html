@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#070b16">
+  <meta name="theme-color" content="#0f172a">
   <title>Trashbelt — Gráficos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=12">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=13">
 
   <script>
     try {
@@ -21,66 +21,125 @@
 </head>
 <body>
   <header class="app-header">
-    <div class="brand">
-      <div class="brand-mark">T</div>
-      <div>Trashbelt</div>
-    </div>
-    <nav>
-      <a href="dashboard.html" class="nav-btn">Visão geral</a>
-      <a href="monitor.html" class="nav-btn">Monitoramento</a>
-      <a href="charts.html" class="nav-btn active">Gráficos</a>
-      <a href="history.html" class="nav-btn">Histórico</a>
-    </nav>
-    <div class="actions">
-      <button class="theme-btn" aria-label="Alternar tema claro/escuro" onclick="toggleTema()" title="Tema">
-        <svg class="icon i-sol"><use href="#i-sol"/></svg>
-        <svg class="icon i-lua"><use href="#i-lua"/></svg>
-      </button>
+    <div class="header-content">
+      <div class="brand">
+        <div class="brand-mark">T</div>
+        <div>Trashbelt</div>
+      </div>
+      <nav class="main-nav">
+        <a href="dashboard.html" class="nav-btn">Visão geral</a>
+        <a href="monitor.html" class="nav-btn">Monitoramento</a>
+        <a href="charts.html" class="nav-btn active">Gráficos</a>
+        <a href="history.html" class="nav-btn">Histórico</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn" aria-label="Alternar tema claro/escuro" onclick="toggleTema()" title="Tema">
+          <svg class="icon i-sol"><use href="#i-sol"/></svg>
+          <svg class="icon i-lua"><use href="#i-lua"/></svg>
+        </button>
+      </div>
     </div>
   </header>
 
   <div class="main">
-    <div>
-      <h1 class="section-title">Gráficos</h1>
-      <p class="section-sub">Visualização dos dados de coleta · passe o mouse nas barras</p>
+    <div class="page-header">
+      <h1>Gráficos</h1>
+      <p>Visualização dos dados de coleta · passe o mouse nas barras</p>
     </div>
 
-    <div class="chart-cards">
-      <article class="panel big-chart">
-        <div class="panel-head">
-          <div><h3 id="period-titulo">Quantidade de resíduos coletados</h3><p id="period-descricao">Por dia</p></div>
-          <div style="display:flex; gap:6px">
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:2rem">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Quantidade de resíduos coletados</h2>
+            <p id="period-descricao">Por dia</p>
+          </div>
+          <div class="bars-period-tabs">
             <button class="period-tab active" data-period="dia" onclick="setPeriod('dia')">Dia</button>
             <button class="period-tab" data-period="semana" onclick="setPeriod('semana')">Semana</button>
             <button class="period-tab" data-period="mes" onclick="setPeriod('mes')">Mês</button>
           </div>
         </div>
-        <div class="period-summary"><strong id="period-total"><span class="num">—</span></strong><span>un no período exibido</span></div>
-        <div class="bars empty-bars" id="period-bars">
-          <div><i style="height:0%"></i><span>—</span></div>
-          <div><i style="height:0%"></i><span>—</span></div>
-          <div><i style="height:0%"></i><span>—</span></div>
-          <div><i style="height:0%"></i><span>—</span></div>
-          <div><i style="height:0%"></i><span>—</span></div>
-          <div><i style="height:0%"></i><span>—</span></div>
-          <div><i style="height:0%"></i><span>—</span></div>
+        <div class="bars-title">
+          <h3>Total no período</h3>
+          <span class="bars-total" id="period-total">—</span>
         </div>
-        <div class="stack-legend"><span><i class="sd pa"></i>Papel</span><span><i class="sd pl"></i>Plástico</span><span><i class="sd v"></i>Vidro</span></div>
-        <p class="chart-empty" id="period-empty">Aguardando dados da esteira para exibir as coletas.</p>
+        <div class="bars-grid" id="period-bars">
+          <div class="bar-column">
+            <div class="bar-value">—</div>
+            <div class="bar-stack"></div>
+            <div class="bar-label">—</div>
+          </div>
+          <div class="bar-column">
+            <div class="bar-value">—</div>
+            <div class="bar-stack"></div>
+            <div class="bar-label">—</div>
+          </div>
+          <div class="bar-column">
+            <div class="bar-value">—</div>
+            <div class="bar-stack"></div>
+            <div class="bar-label">—</div>
+          </div>
+          <div class="bar-column">
+            <div class="bar-value">—</div>
+            <div class="bar-stack"></div>
+            <div class="bar-label">—</div>
+          </div>
+          <div class="bar-column">
+            <div class="bar-value">—</div>
+            <div class="bar-stack"></div>
+            <div class="bar-label">—</div>
+          </div>
+          <div class="bar-column">
+            <div class="bar-value">—</div>
+            <div class="bar-stack"></div>
+            <div class="bar-label">—</div>
+          </div>
+          <div class="bar-column">
+            <div class="bar-value">—</div>
+            <div class="bar-stack"></div>
+            <div class="bar-label">—</div>
+          </div>
+        </div>
+        <div class="bars-legend">
+          <span><span class="dot" style="background:var(--papel)"></span>Papel</span>
+          <span><span class="dot" style="background:var(--plastico)"></span>Plástico</span>
+          <span><span class="dot" style="background:var(--vidro)"></span>Vidro</span>
+        </div>
+        <p class="chart-empty" id="period-empty" style="text-align:center;color:var(--text-secondary);margin-top:1rem">Aguardando dados da esteira para exibir as coletas.</p>
       </article>
 
       <article class="panel">
-        <div class="panel-head"><div><h3>Comparação</h3><p>Papel × plástico × vidro</p></div></div>
-        <div class="compare">
-          <div><span>Papel</span><div><i id="cmp-papel" style="width:0%"></i></div><b id="cmp-papel-num">—</b></div>
-          <div><span>Plástico</span><div><i id="cmp-plastico" style="width:0%"></i></div><b id="cmp-plastico-num">—</b></div>
-          <div><span>Vidro</span><div><i id="cmp-vidro" style="width:0%"></i></div><b id="cmp-vidro-num">—</b></div>
+        <div class="panel-header">
+          <div>
+            <h2>Comparação por material</h2>
+            <p>Papel × plástico × vidro</p>
+          </div>
+        </div>
+        <div class="compare-grid">
+          <div class="compare-item">
+            <span>Papel</span>
+            <div class="compare-bar"><div class="compare-fill papel" id="cmp-papel" style="width:0%"></div></div>
+            <span class="compare-value" id="cmp-papel-num">—</span>
+          </div>
+          <div class="compare-item">
+            <span>Plástico</span>
+            <div class="compare-bar"><div class="compare-fill plastico" id="cmp-plastico" style="width:0%"></div></div>
+            <span class="compare-value" id="cmp-plastico-num">—</span>
+          </div>
+          <div class="compare-item">
+            <span>Vidro</span>
+            <div class="compare-bar"><div class="compare-fill vidro" id="cmp-vidro" style="width:0%"></div></div>
+            <span class="compare-value" id="cmp-vidro-num">—</span>
+          </div>
         </div>
       </article>
     </div>
   </div>
 
-  <footer><span>TRASHBELT • 2026</span><span>Monitoramento de resíduos</span></footer>
+  <footer style="margin-top:3rem;padding:2rem 1rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.875rem;text-align:center">
+    TRASHBELT • 2026 — Monitoramento de resíduos
+  </footer>
 
   <div class="tooltip" id="tooltip" hidden></div>
 
@@ -95,6 +154,6 @@
     </defs>
   </svg>
 
-  <script src="js/app.js?v=12"></script>
+  <script src="js/app.js?v=13"></script>
 </body>
 </html>

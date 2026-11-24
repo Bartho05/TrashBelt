@@ -1,7 +1,5 @@
 /* =====================================================================
-   Trashbelt — Frontend (páginas separadas)
-   Cada página carrega este mesmo JS, que detecta automaticamente em qual
-   está e executa apenas os componentes relevantes.
+   Trashbelt — Frontend (páginas separadas, design limpo)
    ===================================================================== */
 
 "use strict";
@@ -73,7 +71,7 @@ function toggleTema() {
 function aplicarTema(tema) {
   document.documentElement.dataset.theme = tema;
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", tema === "light" ? "#eef1f8" : "#070b16");
+  if (meta) meta.setAttribute("content", tema === "light" ? "#f8fafc" : "#0f172a");
   try { localStorage.setItem("trashbelt-tema", tema); } catch (e) { }
 }
 
@@ -82,7 +80,7 @@ aplicarTema(document.documentElement.dataset.theme === "light" ? "light" : "dark
 /* ---------- Tooltip flutuante ---------- */
 const tooltip = document.getElementById("tooltip");
 function moverTooltip(e) {
-  if (!tooltip || tooltip.hidden) return;
+  if (!tooltip || !tooltip.classList.contains("visible")) return;
   const margem = 14;
   let x = e.clientX + margem;
   let y = e.clientY + margem;
@@ -96,18 +94,23 @@ function moverTooltip(e) {
 function mostrarTooltip(html, e) {
   if (!tooltip) return;
   tooltip.innerHTML = html;
-  tooltip.hidden = false;
+  tooltip.classList.add("visible");
+  tooltip.style.display = "block";
   moverTooltip(e);
 }
-function esconderTooltip() { if (tooltip) tooltip.hidden = true; }
+function esconderTooltip() {
+  if (!tooltip) return;
+  tooltip.classList.remove("visible");
+  tooltip.style.display = "none";
+}
 
 /** Tooltip com total + detalhamento por material */
 function tooltipDetalhe(point, legenda) {
   const total = Number(point?.un || 0);
   const partes = [
-    ["#5f8bff", "Papel", Number(point?.papel || 0)],
-    ["#4fd0a8", "Plástico", Number(point?.plastico || 0)],
-    ["#f5c87e", "Vidro", Number(point?.vidro || 0)],
+    ["#3b82f6", "Papel", Number(point?.papel || 0)],
+    ["#10b981", "Plástico", Number(point?.plastico || 0)],
+    ["#f59e0b", "Vidro", Number(point?.vidro || 0)],
   ].filter(([, , v]) => v > 0)
    .map(([cor, nome, v]) => `<span class="tt-dot" style="background:${cor}"></span>${nome} ${v.toLocaleString("pt-BR")}`);
   const detalhe = partes.length ? `<small>${partes.join(" &nbsp;·&nbsp; ")}</small>` : "";
@@ -123,14 +126,16 @@ function fecharToast(t) {
   t.classList.add("saindo");
   setTimeout(() => t.remove(), 350);
 }
-function toast(titulo, corpo) {
+function toast(titulo, corpo, tipo = "success") {
   if (!toastsEl) return;
   const t = document.createElement("div");
   t.className = "toast";
   t.innerHTML = `
-    <span class="toast-ic"><svg class="icon"><use href="#i-reciclar"/></svg></span>
-    <div class="toast-tx"><b>${escapeHtml(titulo)}</b><small>${escapeHtml(corpo)}</small></div>
-    <span class="toast-x">×</span>`;
+    <div class="toast-icon ${tipo}">
+      <svg class="icon"><use href="#i-reciclar"/></svg>
+    </div>
+    <div class="toast-content"><b>${escapeHtml(titulo)}</b><small>${escapeHtml(corpo)}</small></div>
+    <div class="toast-close" onclick="fecharToast(this.parentElement)">×</div>`;
   t.addEventListener("click", () => fecharToast(t));
   toastsEl.appendChild(t);
   while (toastsEl.children.length > 3) toastsEl.firstElementChild.remove();
@@ -159,7 +164,7 @@ async function loadDashboard() {
   } catch (err) {
     console.error("Não foi possível carregar os dados da esteira:", err);
     falhasSeguidas++;
-    if (falhasSeguidas === 1) toast("Falha de conexão", "Sem resposta do servidor. Tentando de novo em 10s…");
+    if (falhasSeguidas === 1) toast("Falha de conexão", "Sem resposta do servidor. Tentando de novo em 10s…", "error");
   }
 }
 
@@ -167,23 +172,16 @@ async function loadDashboard() {
 function atualizarPagina(data) {
   if (!data) return;
 
-  // Atualiza elementos comuns a todas as páginas
   setText("#monitor-update", data.ultimaAtualizacao ? formatDateTime(data.ultimaAtualizacao) : "—");
 
-  // Atualiza histórico (comum a todas as páginas que o tenham)
   if (Array.isArray(data.registros)) {
     registrosAtuais = data.registros;
     renderHistorico();
   }
 
-  // Página específica
-  if (paginaAtual === "dashboard") {
-    atualizarDashboard(data);
-  } else if (paginaAtual === "charts") {
-    atualizarCharts(data);
-  } else if (paginaAtual === "monitor") {
-    atualizarMonitor(data);
-  }
+  if (paginaAtual === "dashboard") atualizarDashboard(data);
+  else if (paginaAtual === "charts") atualizarCharts(data);
+  else if (paginaAtual === "monitor") atualizarMonitor(data);
 }
 
 function atualizarDashboard(data) {
@@ -215,15 +213,6 @@ function atualizarDashboard(data) {
   setText("#leg-plastico", validTotal ? percentages[1].toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%" : "—");
   setText("#leg-vidro", validTotal ? percentages[2].toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%" : "—");
 
-  const donut = document.querySelector(".donut");
-  if (donut) {
-    donut.style.background = validTotal
-      ? `conic-gradient(#3157c8 0 ${percentages[0]}%, #35b991 ${percentages[0]}% ${percentages[0] + percentages[1]}%, #efb45e ${percentages[0] + percentages[1]}% 100%)`
-      : "conic-gradient(var(--donut-empty) 0 100%)";
-  }
-  setText("#donut-num", validTotal ? total : "—");
-
-  // Gráfico de linha
   if (Array.isArray(data.coletaPorDia)) {
     updateDailyChart(data.coletaPorDia);
     updateBarras("dia", data.coletaPorDia);
@@ -242,42 +231,38 @@ function atualizarCharts(data) {
   const validValues = compareValues.filter(v => v != null && !Number.isNaN(v));
   const max = Math.max(...validValues, 1);
 
-  const cmpPapel = document.getElementById("cmp-papel");
-  const cmpPlastico = document.getElementById("cmp-plastico");
-  const cmpVidro = document.getElementById("cmp-vidro");
-  const cmpPapelNum = document.getElementById("cmp-papel-num");
-  const cmpPlasticoNum = document.getElementById("cmp-plastico-num");
-  const cmpVidroNum = document.getElementById("cmp-vidro-num");
-
-  if (cmpPapel) cmpPapel.style.width = papel != null ? (papel / max) * 100 + "%" : "0%";
-  if (cmpPlastico) cmpPlastico.style.width = plastico != null ? (plastico / max) * 100 + "%" : "0%";
-  if (cmpVidro) cmpVidro.style.width = vidro != null ? (vidro / max) * 100 + "%" : "0%";
-  if (cmpPapelNum) animar(cmpPapelNum, papel);
-  if (cmpPlasticoNum) animar(cmpPlasticoNum, plastico);
-  if (cmpVidroNum) animar(cmpVidroNum, vidro);
+  ["papel", "plastico", "vidro"].forEach((mat, i) => {
+    const fill = document.getElementById("cmp-" + mat);
+    const num = document.getElementById("cmp-" + mat + "-num");
+    const val = compareValues[i];
+    if (fill) fill.style.width = val != null ? (val / max) * 100 + "%" : "0%";
+    if (num) animar(num, val);
+  });
 }
 
 function atualizarMonitor(data) {
   if (data.monitoramento) {
     const m = data.monitoramento;
     setText("#coleta-taxa", m.coletaUnHora != null ? Number(m.coletaUnHora).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " un/h" : "— un/h");
-    atualizarSensor("sensor-esteira", m.esteira);
-    atualizarSensor("sensor-separacao", m.separacao);
-    atualizarSensor("sensor-coleta", m.coleta);
-    atualizarSensor("sensor-manutencao", m.manutencao);
+    atualizarSensor("dot-esteira", "sensor-esteira", m.esteira);
+    atualizarSensor("dot-separacao", "sensor-separacao", m.separacao);
+    atualizarSensor("dot-coleta", "sensor-coleta", m.coleta);
+    atualizarSensor("dot-manutencao", "sensor-manutencao", m.manutencao);
   }
 }
 
-function atualizarSensor(id, value) {
-  const el = document.getElementById(id);
-  if (!el || value === undefined || value === null) return;
-  el.textContent = value;
-  const dot = el.parentElement.querySelector("i");
-  const off = /não|deslig|inativo|parado|aguardando|sem dados/i.test(String(value));
-  if (dot) dot.classList.toggle("off", off);
+function atualizarSensor(dotId, valId, value) {
+  const dot = document.getElementById(dotId);
+  const val = document.getElementById(valId);
+  if (val) val.textContent = value;
+  if (dot) {
+    const off = /não|deslig|inativo|parado|aguardando|sem dados/i.test(String(value));
+    dot.classList.toggle("online", !off);
+    dot.classList.toggle("offline", off);
+  }
 }
 
-/* ---------- Histórico (comum) ---------- */
+/* ---------- Histórico ---------- */
 let filtroHistorico = "todos";
 let sortState = { key: null, dir: 1 };
 
@@ -307,9 +292,9 @@ function valorOrdenacao(registro, key) {
 
 function classeMaterial(nome) {
   const n = String(nome || "").toLowerCase();
-  if (n.includes("plást")) return "plastic";
-  if (n.includes("vid")) return "glass";
-  return "paper";
+  if (n.includes("plást")) return "plastico";
+  if (n.includes("vid")) return "vidro";
+  return "papel";
 }
 
 function renderHistorico() {
@@ -331,11 +316,15 @@ function renderHistorico() {
     });
   }
 
+  document.querySelectorAll("th").forEach(th => th.classList.remove("sorted"));
+  const activeTh = document.querySelector('th[data-key="' + sortState.key + '"]');
+  if (activeTh) activeTh.classList.add("sorted");
+
   if (!filtrados.length) {
     const msg = filtroHistorico === "todos"
       ? "Nenhum registro disponível. Aguardando dados da esteira."
       : "Nenhum registro deste material.";
-    tbody.innerHTML = `<tr><td colspan="5" class="empty-history">${msg}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><p>${escapeHtml(msg)}</p></td></tr>`;
     return;
   }
 
@@ -346,9 +335,9 @@ function renderHistorico() {
     return `<tr>
       <td>${escapeHtml(item.data)}</td>
       <td>${escapeHtml(item.horario)}</td>
-      <td><span class="material-dot ${cls}"></span> ${escapeHtml(item.material)}</td>
+      <td class="material-cell"><div class="material-dot ${cls}"></div>${escapeHtml(item.material)}</td>
       <td><b>${quantity}</b></td>
-      <td><span class="status">${escapeHtml(item.status)}</span></td>
+      <td><span class="status-badge">${escapeHtml(item.status)}</span></td>
     </tr>`;
   }).join("");
 }
@@ -356,6 +345,7 @@ function renderHistorico() {
 /* ---------- Gráfico de linha (dashboard) ---------- */
 let coordsGrafico = [];
 let labelsGrafico = [];
+let linePoints = [];
 
 function caminhoSuave(pts) {
   if (pts.length < 2) return pts.length ? "M" + pts[0][0] + " " + pts[0][1] : "";
@@ -375,6 +365,7 @@ function caminhoSuave(pts) {
 }
 
 function updateDailyChart(points) {
+  linePoints = points;
   labelsGrafico = points.map(p => p.label ?? "—");
   const labels = document.querySelectorAll(".x-labels span");
   points.slice(-labels.length).forEach((point, i) => { if (labels[i]) labels[i].textContent = point.label ?? "—"; });
@@ -384,12 +375,12 @@ function updateDailyChart(points) {
   const max = Math.max(...values, 1);
   const topo = niceMax(max);
 
-  const ySpans = document.querySelectorAll(".y-labels span:not(.eixo)");
+  const ySpans = document.querySelectorAll(".y-labels span");
   [1, .75, .5, .25].forEach((f, i) => {
     if (ySpans[i]) ySpans[i].textContent = Math.round(topo * f).toLocaleString("pt-BR");
   });
 
-  const svg = document.querySelector(".line-chart svg");
+  const svg = document.querySelector(".line-chart-wrap svg");
   if (!svg) return;
   const width = 700;
   const height = 200;
@@ -403,9 +394,9 @@ function updateDailyChart(points) {
   if (paths[0]) paths[0].setAttribute("d", linha + " L" + width + " " + height + " L0 " + height + "Z");
   if (paths[1]) paths[1].setAttribute("d", linha);
 
-  const circles = document.getElementById("line-circles");
-  if (circles) {
-    circles.innerHTML = "";
+  const circlesGroup = document.getElementById("line-circles");
+  if (circlesGroup) {
+    circlesGroup.innerHTML = "";
     let idxMax = -1, maior = -1;
     values.forEach((v, i) => { if (v > maior) { maior = v; idxMax = i; } });
     coordsGrafico.forEach(([x, y], i) => {
@@ -413,34 +404,52 @@ function updateDailyChart(points) {
       c.setAttribute("cx", x);
       c.setAttribute("cy", y);
       c.setAttribute("r", i === idxMax ? 8 : 6);
-      c.setAttribute("fill", "#0b1220");
-      c.setAttribute("stroke", "#5f8bff");
-      c.setAttribute("stroke-width", "4");
-      if (i === idxMax) c.setAttribute("class", "max-dot");
-      circles.appendChild(c);
+      c.setAttribute("fill", i === idxMax ? "#22c55e" : "#0f172a");
+      c.setAttribute("stroke", i === idxMax ? "#fff" : "#2563eb");
+      c.setAttribute("stroke-width", i === idxMax ? 3 : 2);
+      c.setAttribute("class", i === idxMax ? "max-dot" : "");
+      circlesGroup.appendChild(c);
     });
   }
 
-  // Linha tracejada de média
   const media = values.reduce((s, v) => s + v, 0) / values.length;
-  const avgEl = document.querySelector(".avg-line");
+  const avgEl = document.getElementById("avg-line");
   if (avgEl) {
     if (media > 0) {
       avgEl.hidden = false;
+      avgEl.style.display = "block";
       avgEl.style.bottom = (20 + (media / max) * 70).toFixed(2) + "%";
       const rot = avgEl.querySelector("span");
       if (rot) rot.textContent = "média " + Math.round(media) + " un";
     } else {
       avgEl.hidden = true;
+      avgEl.style.display = "none";
     }
   }
 
-  // Hover na linha
   const chartArea = document.querySelector(".chart-area");
   if (chartArea && !chartArea._listener) {
-    const guide = chartArea.querySelector(".guide-line");
+    const guide = document.createElement("div");
+    guide.className = "avg-line guide-line";
+    guide.style.borderTop = "1px solid var(--primary)";
+    guide.style.left = "40px";
+    guide.style.right = "0";
+    guide.style.pointerEvents = "none";
+    guide.style.zIndex = "10";
+    guide.hidden = true;
+    chartArea.appendChild(guide);
+
     const hoverDot = document.createElement("div");
-    hoverDot.className = "hover-dot";
+    hoverDot.style.position = "absolute";
+    hoverDot.style.width = "10px";
+    hoverDot.style.height = "10px";
+    hoverDot.style.borderRadius = "50%";
+    hoverDot.style.background = "var(--primary)";
+    hoverDot.style.transform = "translate(-50%, -50%)";
+    hoverDot.style.opacity = "0";
+    hoverDot.style.transition = "opacity 0.15s ease";
+    hoverDot.style.pointerEvents = "none";
+    hoverDot.style.zIndex = "15";
     chartArea.appendChild(hoverDot);
     chartArea._listener = true;
 
@@ -452,7 +461,7 @@ function updateDailyChart(points) {
       const [x, y] = coordsGrafico[idx];
       const px = (x / 700) * rect.width;
       const py = (y / 250) * rect.height;
-      if (guide) { guide.hidden = false; guide.style.left = px + "px"; }
+      if (guide) { guide.hidden = false; guide.style.display = "block"; guide.style.left = px + "px"; }
       hoverDot.style.left = px + "px";
       hoverDot.style.top = py + "px";
       hoverDot.style.opacity = "1";
@@ -460,7 +469,7 @@ function updateDailyChart(points) {
       mostrarTooltip(tooltipDetalhe(point, diaSemana(labelsGrafico[idx])), e);
     });
     chartArea.addEventListener("mouseleave", () => {
-      if (guide) guide.hidden = true;
+      if (guide) { guide.hidden = true; guide.style.display = "none"; }
       hoverDot.style.opacity = "0";
       esconderTooltip();
     });
@@ -476,7 +485,7 @@ function diaSemana(label) {
   return dias[d.getDay()] + ", " + m[1] + "/" + m[2];
 }
 
-/* ---------- Barras empilhadas (charts + dashboard) ---------- */
+/* ---------- Barras empilhadas ---------- */
 const periodState = { dia: [], semana: [], mes: [] };
 let periodoAtivo = "dia";
 
@@ -507,29 +516,23 @@ function renderBarras(period) {
   const barsWrap = document.getElementById("period-bars");
 
   const descs = { dia: "Quantidade coletada em cada dia", semana: "Quantidade coletada em cada semana", mes: "Quantidade coletada em cada mês" };
-  const empties = { dia: "Aguardando dados da esteira para exibir as coletas por dia.", semana: "Aguardando dados da esteira para exibir as coletas por semana.", mes: "Aguardando dados da esteira para exibir as coletas por mês." };
   if (description) description.textContent = descs[period] || "";
 
   const values = points.map(p => Number(p.un)).filter(v => Number.isFinite(v));
   const total = values.reduce((s, v) => s + v, 0);
-  if (totalNum) {
-    const numEl = totalNum.querySelector(".num");
-    if (numEl) animar(numEl, values.length ? total : null);
-  }
+  if (totalNum) animar(totalNum, values.length ? total : null);
 
   if (!points.length || !values.length) {
-    if (emptyEl) { emptyEl.textContent = empties[period] || ""; emptyEl.hidden = false; }
+    if (emptyEl) { emptyEl.textContent = "Aguardando dados da esteira para exibir as coletas."; emptyEl.style.display = "block"; }
     if (barsWrap) {
-      barsWrap.classList.add("empty-bars");
       barsWrap.innerHTML = Array.from({ length: 7 }, () =>
-        '<div><i style="height:0%"></i><span>—</span></div>'
+        '<div class="bar-column"><div class="bar-value">—</div><div class="bar-stack"></div><div class="bar-label">—</div></div>'
       ).join("");
     }
     return;
   }
 
-  if (emptyEl) emptyEl.hidden = true;
-  if (barsWrap) barsWrap.classList.remove("empty-bars");
+  if (emptyEl) emptyEl.style.display = "none";
 
   const max = Math.max(...values, 1);
   let idxMax = -1, maior = -1;
@@ -541,12 +544,12 @@ function renderBarras(period) {
       const papel = Number(point.papel || 0);
       const plastico = Number(point.plastico || 0);
       const vidro = Number(point.vidro || 0);
-      const seg = (v, cls) => v > 0 ? '<i class="' + cls + '" style="height:' + ((v / max) * 100).toFixed(2) + '%"></i>' : "";
-      const destaque = i === idxMax ? " col-max" : "";
-      return '<div class="bar-col' + destaque + '" style="cursor:crosshair" onmouseover="mostrarTooltipBarras(this, ' + i + ', \'' + period + '\')" onmouseout="esconderTooltip()">' +
-        '<em>' + (un > 0 ? un.toLocaleString("pt-BR") : "") + '</em>' +
-        '<div class="bar-stack">' + seg(papel, "pa") + seg(plastico, "pl") + seg(vidro, "v") + '</div>' +
-        '<span>' + escapeHtml(point.label ?? "—") + '</span>' +
+      const seg = (v, cls, cor) => v > 0 ? '<div class="bar-segment ' + cls + '" style="height:' + ((v / max) * 100).toFixed(2) + '%;background:' + cor + '"></div>' : "";
+      const destaque = i === idxMax ? " bar-column-max" : "";
+      return '<div class="bar-column' + destaque + '" style="cursor:crosshair" onmouseover="mostrarTooltipBarras(this, ' + i + ", '" + period + "'" + ')" onmouseout="esconderTooltip()">' +
+        '<div class="bar-value">' + (un > 0 ? un.toLocaleString("pt-BR") : "") + '</div>' +
+        '<div class="bar-stack">' + seg(papel, "papel", "#3b82f6") + seg(plastico, "plastico", "#10b981") + seg(vidro, "vidro", "#f59e0b") + '</div>' +
+        '<div class="bar-label">' + escapeHtml(point.label ?? "—") + '</div>' +
         '</div>';
     }).join("");
   }
@@ -556,17 +559,16 @@ function mostrarTooltipBarras(el, idx, period) {
   const point = (periodState[period] || [])[idx];
   if (!point || !Number.isFinite(Number(point.un))) { esconderTooltip(); return; }
   const label = period === "semana" ? "semana de " + point.label : (period === "mes" ? (MESES_FULL[String(point.label)] || point.label) : diaSemana(point.label));
-  mostrarTooltip(tooltipDetalhe(point, label), { clientX: el.getBoundingClientRect().left + el.offsetWidth / 2, clientY: el.getBoundingClientRect().top - 10 });
+  const rect = el.getBoundingClientRect();
+  mostrarTooltip(tooltipDetalhe(point, label), { clientX: rect.left + rect.width / 2, clientY: rect.top - 10 });
 }
 
-/* ---------- Filtro material (dashboard rosca) ---------- */
+/* ---------- Filtro material ---------- */
 function filtrarMaterial(mat) {
-  // Em páginas separadas, apenas navega para o histórico filtrado
   location.href = "history.html?filtro=" + mat;
 }
 
 /* ---------- Inicialização ---------- */
-// Aplica filtro de material vindo da URL (ex: history.html?filtro=papel)
 const urlParams = new URLSearchParams(location.search);
 if (urlParams.get("filtro")) {
   filtroHistorico = urlParams.get("filtro");
@@ -579,5 +581,4 @@ function iniciar() {
   setInterval(loadDashboard, 10000);
 }
 
-// Script está no final do <body>, então DOM já está pronto
 iniciar();

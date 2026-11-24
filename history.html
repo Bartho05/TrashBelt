@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#070b16">
+  <meta name="theme-color" content="#0f172a">
   <title>Trashbelt — Histórico</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=12">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=13">
 
   <script>
     try {
@@ -21,30 +21,33 @@
 </head>
 <body>
   <header class="app-header">
-    <div class="brand">
-      <div class="brand-mark">T</div>
-      <div>Trashbelt</div>
-    </div>
-    <nav>
-      <a href="dashboard.html" class="nav-btn">Visão geral</a>
-      <a href="monitor.html" class="nav-btn">Monitoramento</a>
-      <a href="charts.html" class="nav-btn">Gráficos</a>
-      <a href="history.html" class="nav-btn active">Histórico</a>
-    </nav>
-    <div class="actions">
-      <button class="theme-btn" aria-label="Alternar tema claro/escuro" onclick="toggleTema()" title="Tema">
-        <svg class="icon i-sol"><use href="#i-sol"/></svg>
-        <svg class="icon i-lua"><use href="#i-lua"/></svg>
-      </button>
+    <div class="header-content">
+      <div class="brand">
+        <div class="brand-mark">T</div>
+        <div>Trashbelt</div>
+      </div>
+      <nav class="main-nav">
+        <a href="dashboard.html" class="nav-btn">Visão geral</a>
+        <a href="monitor.html" class="nav-btn">Monitoramento</a>
+        <a href="charts.html" class="nav-btn">Gráficos</a>
+        <a href="history.html" class="nav-btn active">Histórico</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn" aria-label="Alternar tema claro/escuro" onclick="toggleTema()" title="Tema">
+          <svg class="icon i-sol"><use href="#i-sol"/></svg>
+          <svg class="icon i-lua"><use href="#i-lua"/></svg>
+        </button>
+      </div>
     </div>
   </header>
 
   <div class="main">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap">
-      <div>
-        <h1 class="section-title">Histórico de coletas</h1>
-        <p class="section-sub">Clique nos títulos das colunas para ordenar</p>
-      </div>
+    <div class="page-header">
+      <h1>Histórico de coletas</h1>
+      <p>Clique nos títulos das colunas para ordenar</p>
+    </div>
+
+    <div class="history-controls">
       <select class="filter-select" id="filtro-material" onchange="filtrarHistorico(this.value)">
         <option value="todos">Material: Todos</option>
         <option value="papel">Material: Papel</option>
@@ -53,27 +56,31 @@
       </select>
     </div>
 
-    <div class="panel table-panel">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th data-key="data" onclick="ordenar('data')" title="Ordenar por data">Data</th>
-              <th data-key="horario" onclick="ordenar('horario')" title="Ordenar por horário">Horário</th>
-              <th data-key="material" onclick="ordenar('material')" title="Ordenar por material">Material</th>
-              <th data-key="quantidadeUn" onclick="ordenar('quantidadeUn')" title="Ordenar por quantidade">Quantidade</th>
-              <th data-key="status" onclick="ordenar('status')" title="Ordenar por status">Status</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-historico">
-            <tr><td colspan="5" class="empty-history">Nenhum registro disponível. Aguardando dados da esteira.</td></tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="panel table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-key="data" onclick="ordenar('data')" title="Ordenar por data">Data</th>
+            <th data-key="horario" onclick="ordenar('horario')" title="Ordenar por horário">Horário</th>
+            <th data-key="material" onclick="ordenar('material')" title="Ordenar por material">Material</th>
+            <th data-key="quantidadeUn" onclick="ordenar('quantidadeUn')" title="Ordenar por quantidade">Quantidade</th>
+            <th data-key="status" onclick="ordenar('status')" title="Ordenar por status">Status</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-historico">
+          <tr>
+            <td colspan="5" class="empty-state">
+              <p>Nenhum registro disponível. Aguardando dados da esteira.</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <footer><span>TRASHBELT • 2026</span><span>Monitoramento de resíduos</span></footer>
+  <footer style="margin-top:3rem;padding:2rem 1rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.875rem;text-align:center">
+    TRASHBELT • 2026 — Monitoramento de resíduos
+  </footer>
 
   <!-- Sprite SVG -->
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
@@ -86,6 +93,6 @@
     </defs>
   </svg>
 
-  <script src="js/app.js?v=12"></script>
+  <script src="js/app.js?v=13"></script>
 </body>
 </html>

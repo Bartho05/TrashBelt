@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#070b16">
+  <meta name="theme-color" content="#0f172a">
   <title>Trashbelt — Visão geral</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=12">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=13">
 
   <script>
     try {
@@ -21,107 +21,198 @@
 </head>
 <body>
   <header class="app-header">
-    <div class="brand">
-      <div class="brand-mark">T</div>
-      <div>Trashbelt</div>
-    </div>
-    <nav>
-      <a href="dashboard.html" class="nav-btn active">Visão geral</a>
-      <a href="monitor.html" class="nav-btn">Monitoramento</a>
-      <a href="charts.html" class="nav-btn">Gráficos</a>
-      <a href="history.html" class="nav-btn">Histórico</a>
-    </nav>
-    <div class="actions">
-      <button class="theme-btn" aria-label="Alternar tema claro/escuro" onclick="toggleTema()" title="Tema">
-        <svg class="icon i-sol"><use href="#i-sol"/></svg>
-        <svg class="icon i-lua"><use href="#i-lua"/></svg>
-      </button>
+    <div class="header-content">
+      <div class="brand">
+        <div class="brand-mark">T</div>
+        <div>Trashbelt</div>
+      </div>
+      <nav class="main-nav">
+        <a href="dashboard.html" class="nav-btn active">Visão geral</a>
+        <a href="monitor.html" class="nav-btn">Monitoramento</a>
+        <a href="charts.html" class="nav-btn">Gráficos</a>
+        <a href="history.html" class="nav-btn">Histórico</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn" aria-label="Alternar tema claro/escuro" onclick="toggleTema()" title="Tema">
+          <svg class="icon i-sol"><use href="#i-sol"/></svg>
+          <svg class="icon i-lua"><use href="#i-lua"/></svg>
+        </button>
+      </div>
     </div>
   </header>
 
   <div class="main">
-    <div>
-      <h1 class="section-title">Visão geral</h1>
-      <p class="section-sub">Dados registrados pela esteira Trashbelt · atualiza a cada 10s</p>
+    <div class="page-header">
+      <h1>Visão geral</h1>
+      <p>Dados registrados pela esteira Trashbelt · atualiza a cada 10s</p>
     </div>
 
-    <div class="cards">
+    <div class="cards-grid">
       <article class="stat-card total">
-        <div class="card-top"><span>Total coletado</span><b id="var-total">—</b></div>
-        <strong><span class="num" id="num-total">—</span> <small>un</small></strong>
-        <div class="mini-progress"><span id="progress-bar" style="width:0%"></span></div>
-        <p id="meta-texto">Meta mensal: —</p>
+        <div class="card-label">Total coletado</div>
+        <div class="card-value" id="num-total">—</div>
+        <div class="card-subtitle" id="var-total">—</div>
+        <div class="progress-container">
+          <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+        </div>
+        <div class="card-subtitle" id="meta-texto" style="margin-top:0.75rem">Meta mensal: —</div>
       </article>
       <article class="stat-card">
-        <div class="material-icon paper"><svg class="icon"><use href="#i-papel"/></svg></div>
-        <span class="stat-label">Papel</span>
-        <strong><span class="num" id="num-papel">—</span> <small>un</small></strong>
-        <p id="pct-papel">Aguardando dados</p>
+        <div class="material-icon paper">
+          <svg class="icon"><use href="#i-papel"/></svg>
+        </div>
+        <div class="card-label">Papel</div>
+        <div class="card-value" id="num-papel">—</div>
+        <div class="card-subtitle" id="pct-papel">Aguardando dados</div>
       </article>
       <article class="stat-card">
-        <div class="material-icon plastic"><svg class="icon"><use href="#i-plastico"/></svg></div>
-        <span class="stat-label">Plástico</span>
-        <strong><span class="num" id="num-plastico">—</span> <small>un</small></strong>
-        <p id="pct-plastico">Aguardando dados</p>
+        <div class="material-icon plastic">
+          <svg class="icon"><use href="#i-plastico"/></svg>
+        </div>
+        <div class="card-label">Plástico</div>
+        <div class="card-value" id="num-plastico">—</div>
+        <div class="card-subtitle" id="pct-plastico">Aguardando dados</div>
       </article>
       <article class="stat-card">
-        <div class="material-icon glass"><svg class="icon"><use href="#i-vidro"/></svg></div>
-        <span class="stat-label">Vidro</span>
-        <strong><span class="num" id="num-vidro">—</span> <small>un</small></strong>
-        <p id="pct-vidro">Aguardando dados</p>
+        <div class="material-icon glass">
+          <svg class="icon"><use href="#i-vidro"/></svg>
+        </div>
+        <div class="card-label">Vidro</div>
+        <div class="card-value" id="num-vidro">—</div>
+        <div class="card-subtitle" id="pct-vidro">Aguardando dados</div>
       </article>
     </div>
 
-    <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap: 20px">
-      <article class="panel">
-        <div class="panel-head">
-          <div><h3>Coleta por dia</h3><p>Últimos 7 dias · passe o mouse no gráfico</p></div>
-          <span class="unit">un</span>
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Coleta por dia</h2>
+          <p>Últimos 7 dias · passe o mouse nos pontos</p>
         </div>
-        <div class="line-chart">
-          <div class="y-labels"><span>—</span><span>—</span><span>—</span><span>—</span><span>0</span><span class="eixo">un</span></div>
-          <div class="chart-area">
-            <div class="gridline"></div><div class="gridline"></div><div class="gridline"></div><div class="gridline"></div><div class="gridline"></div>
-            <div class="guide-line" hidden></div>
-            <div class="avg-line" hidden><span>média — un</span></div>
-            <svg viewBox="0 0 700 250" preserveAspectRatio="xMidYMid meet" aria-label="Gráfico de coleta por dia" style="width:100%;height:100%;display:block">
-              <defs><linearGradient id="area" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#4f7cff" stop-opacity=".28"/><stop offset="100%" stop-color="#4f7cff" stop-opacity="0"/></linearGradient></defs>
-              <path id="area-path" d="M0 200 L700 200 L700 250 L0 250Z" fill="url(#area)" opacity="1"/>
-              <path id="line-path" d="M0 200 L700 200" fill="none" stroke="#5f8bff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-              <g id="line-circles" fill="#0b1220" stroke="#5f8bff" stroke-width="4"></g>
-            </svg>
-            <div class="x-labels"><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span></div>
+        <span class="chip">un</span>
+      </div>
+      <div class="line-chart-wrap">
+        <div class="chart-area">
+          <div class="y-labels">
+            <span>—</span><span>—</span><span>—</span><span>—</span><span>0</span>
+          </div>
+          <div class="gridline"></div>
+          <div class="gridline"></div>
+          <div class="gridline"></div>
+          <div class="gridline"></div>
+          <div class="gridline"></div>
+          <div class="avg-line" id="avg-line" hidden><span>média — un</span></div>
+          <svg viewBox="0 0 700 250" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block">
+            <defs>
+              <linearGradient id="area-gradient" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#2563eb" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#2563eb" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path id="area-path" class="area-path" d="M0 200 L700 200 L700 250 L0 250Z"></path>
+            <path id="line-path" class="line-path" d="M0 200 L700 200"></path>
+            <g id="line-circles"></g>
+          </svg>
+          <div class="x-labels">
+            <span>—</span><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span>
           </div>
         </div>
-      </article>
+      </div>
+    </section>
 
-      <article class="panel">
-        <div class="panel-head"><div><h3>Distribuição dos resíduos</h3><p>Passe o mouse nos materiais</p></div></div>
-        <div class="donut-wrap">
-          <div class="donut"><div><strong><span class="num" id="donut-num">—</span></strong><small id="donut-sub">un total</small></div></div>
-          <div class="legend">
-            <div data-mat="papel" onclick="filtrarMaterial('papel')"><i class="dot paper"></i><span>Papel</span><b id="leg-papel">—</b></div>
-            <div data-mat="plastico" onclick="filtrarMaterial('plastico')"><i class="dot plastic"></i><span>Plástico</span><b id="leg-plastico">—</b></div>
-            <div data-mat="vidro" onclick="filtrarMaterial('vidro')"><i class="dot glass"></i><span>Vidro</span><b id="leg-vidro">—</b></div>
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Distribuição dos resíduos</h2>
+          <p>Passe o mouse nos materiais para detalhes</p>
+        </div>
+      </div>
+      <div class="donut-wrap">
+        <div class="donut">
+          <div class="donut-content">
+            <div class="donut-value" id="donut-num">—</div>
+            <div class="donut-label" id="donut-label">un total</div>
           </div>
         </div>
-      </article>
-    </div>
+        <div class="donut-legend">
+          <div class="legend-item active" data-mat="papel" onclick="filtrarMaterial('papel')">
+            <div class="legend-dot" style="background:var(--papel)"></div>
+            <span>Papel</span>
+            <span class="legend-value" id="leg-papel">—</span>
+          </div>
+          <div class="legend-item" data-mat="plastico" onclick="filtrarMaterial('plastico')">
+            <div class="legend-dot" style="background:var(--plastico)"></div>
+            <span>Plástico</span>
+            <span class="legend-value" id="leg-plastico">—</span>
+          </div>
+          <div class="legend-item" data-mat="vidro" onclick="filtrarMaterial('vidro')">
+            <div class="legend-dot" style="background:var(--vidro)"></div>
+            <span>Vidro</span>
+            <span class="legend-value" id="leg-vidro">—</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <div class="bars empty-bars" id="period-bars">
-      <div><i style="height:0%"></i><span>—</span></div>
-      <div><i style="height:0%"></i><span>—</span></div>
-      <div><i style="height:0%"></i><span>—</span></div>
-      <div><i style="height:0%"></i><span>—</span></div>
-      <div><i style="height:0%"></i><span>—</span></div>
-      <div><i style="height:0%"></i><span>—</span></div>
-      <div><i style="height:0%"></i><span>—</span></div>
+    <div class="bars-section">
+      <div class="bars-period-tabs">
+        <button class="period-tab active" data-period="dia" onclick="setPeriod('dia')">Dia</button>
+        <button class="period-tab" data-period="semana" onclick="setPeriod('semana')">Semana</button>
+        <button class="period-tab" data-period="mes" onclick="setPeriod('mes')">Mês</button>
+      </div>
+      <div class="bars-title">
+        <h3 id="period-title">Quantidade de resíduos coletados</h3>
+        <span class="bars-total" id="bars-total">—</span>
+      </div>
+      <div class="bars-grid" id="period-bars">
+        <div class="bar-column">
+          <div class="bar-value">—</div>
+          <div class="bar-stack"></div>
+          <div class="bar-label">—</div>
+        </div>
+        <div class="bar-column">
+          <div class="bar-value">—</div>
+          <div class="bar-stack"></div>
+          <div class="bar-label">—</div>
+        </div>
+        <div class="bar-column">
+          <div class="bar-value">—</div>
+          <div class="bar-stack"></div>
+          <div class="bar-label">—</div>
+        </div>
+        <div class="bar-column">
+          <div class="bar-value">—</div>
+          <div class="bar-stack"></div>
+          <div class="bar-label">—</div>
+        </div>
+        <div class="bar-column">
+          <div class="bar-value">—</div>
+          <div class="bar-stack"></div>
+          <div class="bar-label">—</div>
+        </div>
+        <div class="bar-column">
+          <div class="bar-value">—</div>
+          <div class="bar-stack"></div>
+          <div class="bar-label">—</div>
+        </div>
+        <div class="bar-column">
+          <div class="bar-value">—</div>
+          <div class="bar-stack"></div>
+          <div class="bar-label">—</div>
+        </div>
+      </div>
+      <div class="bars-legend">
+        <span><span class="dot" style="background:var(--papel)"></span>Papel</span>
+        <span><span class="dot" style="background:var(--plastico)"></span>Plástico</span>
+        <span><span class="dot" style="background:var(--vidro)"></span>Vidro</span>
+      </div>
+      <p class="chart-empty" id="period-empty" style="text-align:center;color:var(--text-secondary);margin-top:1rem">Aguardando dados da esteira para exibir as coletas.</p>
     </div>
-    <div class="stack-legend"><span><i class="sd pa"></i>Papel</span><span><i class="sd pl"></i>Plástico</span><span><i class="sd v"></i>Vidro</span></div>
-    <p class="chart-empty" id="period-empty">Aguardando dados da esteira para exibir as coletas por dia.</p>
   </div>
 
-  <footer><span>TRASHBELT • 2026</span><span>Monitoramento de resíduos</span></footer>
+  <footer style="margin-top:3rem;padding:2rem 1rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.875rem;text-align:center">
+    TRASHBELT • 2026 — Monitoramento de resíduos
+  </footer>
 
   <div class="tooltip" id="tooltip" hidden></div>
   <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -137,6 +228,6 @@
     </defs>
   </svg>
 
-  <script src="js/app.js?v=12"></script>
+  <script src="js/app.js?v=13"></script>
 </body>
 </html>
