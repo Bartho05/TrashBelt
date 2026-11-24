@@ -594,6 +594,8 @@ if (urlParams.get("filtro")) {
 }
 
 function iniciar() {
+  // A landing busca o resumo uma única vez no shell.js; o polling é só do painel.
+  if (!["dashboard", "monitor", "charts", "history"].includes(paginaAtual)) return;
   loadDashboard();
   setInterval(loadDashboard, 10000);
 }

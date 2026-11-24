@@ -363,8 +363,15 @@ html[data-theme="light"] .i-lua { display: block }
     position: relative;
     z-index: 1;
     max-width: 1240px;
-    margin: 0 auto 0 268px;
+    margin: 0 auto;
     padding: 2.25rem 2rem 1rem;
+}
+
+/* Só o painel é deslocado pela sidebar (ela vira drawer abaixo de 961px) */
+@media (min-width: 961px) {
+    body.app-shell .main { margin-left: 268px }
+    body.app-shell .footer-inner,
+    body.app-shell .footer-bottom { margin-left: 268px; margin-right: auto }
 }
 
 .page-header { margin-bottom: 1.9rem }
@@ -1375,10 +1382,79 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
 }
 
 /* =====================================================================
-   LANDING PAGE
+   LANDING PAGE — navbar própria
    ===================================================================== */
 
-.landing .main { padding-top: 0 }
+.landing-nav {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    border-bottom: 1px solid var(--border);
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    backdrop-filter: blur(22px) saturate(160%);
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+}
+
+.nav-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0.8rem 1.5rem;
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.landing-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 750;
+    font-size: 1.12rem;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+}
+
+.landing-brand .brand-mark { width: 36px; height: 36px; font-size: 1.05rem }
+
+.landing-links {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: auto;
+}
+
+.landing-links a {
+    padding: 0.55rem 0.85rem;
+    border-radius: 9px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.landing-links a:hover { color: var(--text); background: rgba(127, 145, 180, 0.10) }
+
+.landing-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-left: 0.6rem;
+    border-left: 1px solid var(--border-light);
+}
+
+.btn-dashboard {
+    padding: 0.62rem 1.1rem;
+    font-size: 0.84rem;
+    white-space: nowrap;
+}
+
+.btn-dashboard .icon { width: 16px; height: 16px; transition: transform 0.2s ease }
+.btn-dashboard:hover .icon { transform: translateX(3px) }
+
+.landing .main { padding-top: 1.5rem }
 
 .hero {
     position: relative;
@@ -1413,6 +1489,13 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
     font-weight: 800;
     margin-bottom: 1.2rem;
     background: linear-gradient(115deg, var(--text) 12%, var(--primary) 72%, var(--success) 125%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero h1 .hero-destaque {
+    background: linear-gradient(100deg, var(--success), #34d399);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1702,7 +1785,9 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
     .topbar-toggle { display: grid; background: var(--glass-bg); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow), var(--glass-highlight); }
     .sidebar-close { display: grid !important; position: static; width: 32px; height: 32px; margin-left: auto; border-radius: 9px; background: rgba(127, 145, 180, 0.1); border: 1px solid var(--border-light); }
     .main { margin: 0 auto; padding-top: 4.6rem }
-    .landing .main { padding-top: 3.6rem }
+    .landing .main { padding-top: 1.5rem }
+    .landing-links { display: none }
+    .landing-actions { border-left: 0; padding-left: 0; margin-left: auto }
 }
 
 @media (max-width: 900px) {
@@ -1716,7 +1801,12 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
 
 @media (max-width: 640px) {
     .main { padding: 4.2rem 1rem 1rem }
-    .landing .main { padding: 3.4rem 1rem 1rem }
+    .landing .main { padding: 1.2rem 1rem 1rem }
+    .nav-inner { padding: 0.65rem 1rem; min-height: 60px; gap: 0.7rem }
+    .landing-brand { font-size: 1rem }
+    .landing-brand .brand-mark { width: 32px; height: 32px }
+    .btn-dashboard { padding: 0.55rem 0.8rem; font-size: 0.78rem }
+    .landing-actions .icon-btn { width: 32px; height: 32px }
     .page-header h1 { font-size: 1.5rem }
     .cards-grid { grid-template-columns: 1fr; gap: 0.85rem }
     .stat-card.total { grid-column: auto }
@@ -1747,7 +1837,9 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
     .card-value { font-size: 1.8rem }
     .panel-header { align-items: flex-start }
     .hero h1 { font-size: 2rem }
-    .btn { width: 100%; justify-content: center }
+    .hero-actions .btn,
+    .cta-band .btn { width: 100%; justify-content: center }
+    .btn-dashboard { width: auto; justify-content: center }
 }
 
 /* =====================================================================

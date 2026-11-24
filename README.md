@@ -47,8 +47,8 @@ Uma esteira equipada com ESP32, sensor de cores TCS34725, três servomotores e s
 
 ### Funcionalidades Principais
 
-- [x] Landing page institucional com dados reais da coleta
-- [x] Site com páginas separadas e navegação por sidebar (drawer no celular)
+- [x] Landing page institucional em `index.html`, com navbar própria e botão "Dashboard"
+- [x] Painel separado da landing, com páginas independentes e sidebar (drawer no celular)
 - [x] Atualização automática a cada 10 s (polling)
 - [x] Totais em tempo real: geral + papel, plástico e vidro (em "un")
 - [x] Gráficos de coleta por dia, semana e mês (linha, rosca e barras empilhadas)
@@ -86,8 +86,8 @@ Trashbelt/
 ├── charts.html                 # Gráficos e comparação por material
 ├── history.html                # Tabela filtrável e ordenável
 ├── css/style.css               # Estilos, temas, sidebar e glassmorphism
-├── js/app.js                   # Dados, gráficos, tooltips e temas
-├── js/shell.js                 # Sidebar, drawer mobile e rodapé
+├── js/app.js                   # Dados, gráficos, tooltips e temas (somente painel)
+├── js/shell.js                 # Navbar da landing, sidebar/drawer do painel e rodapé
 ├── vercel.json                 # Rotas e build da Vercel
 ├── .env.example                # Modelo das variáveis de ambiente
 ├── api/
