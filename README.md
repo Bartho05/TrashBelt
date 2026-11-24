@@ -201,8 +201,9 @@ O front-end é estático (HTML/CSS/JS) e roda direto na Vercel. O back-end usa u
 
 ### 1. Prepare o repositório
 Certifique-se de que estes arquivos estão no Git:
-- `vercel.json` — rotas da Vercel
+- `vercel.json` — rewrites das URLs antigas
 - `api/dashboard.js` — serverless function (substitui o PHP em produção)
+- `.vercelignore` — exclui o PHP local do deploy (evita conflito `dashboard.js` x `dashboard.php`)
 - `.env.example` — modelo de variáveis de ambiente (não commite o `.env` real)
 
 ### 2. Conecte no Vercel

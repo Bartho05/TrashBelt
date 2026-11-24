@@ -1,0 +1,14 @@
+# O backend PHP existe apenas para uso local (XAMPP).
+# Na Vercel quem responde /api/dashboard é a serverless function api/dashboard.js.
+# Manter os dois gera conflito de nome: dashboard.js x dashboard.php.
+api/*.php
+api/.htaccess
+.htaccess
+
+# Nada disso é necessário no deploy
+.env
+.env.*
+.vercel/
+arduino/
+docs/
+*.md
