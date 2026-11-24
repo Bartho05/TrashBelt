@@ -213,6 +213,22 @@ function atualizarDashboard(data) {
   setText("#leg-plastico", validTotal ? percentages[1].toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%" : "—");
   setText("#leg-vidro", validTotal ? percentages[2].toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%" : "—");
 
+  // Rosca sincronizada com os cards de material
+  animar(document.getElementById("donut-num"), total);
+  const ring = document.getElementById("donut-ring");
+  if (ring) {
+    if (validTotal) {
+      const a = ((papel || 0) / total) * 360;
+      const b = a + ((plastico || 0) / total) * 360;
+      ring.style.background = "conic-gradient(" +
+        "var(--papel) 0deg " + a.toFixed(2) + "deg," +
+        "var(--plastico) " + a.toFixed(2) + "deg " + b.toFixed(2) + "deg," +
+        "var(--vidro) " + b.toFixed(2) + "deg 360deg)";
+    } else {
+      ring.style.background = "conic-gradient(var(--border-light) 0deg 360deg)";
+    }
+  }
+
   if (Array.isArray(data.coletaPorDia)) {
     updateDailyChart(data.coletaPorDia);
     updateBarras("dia", data.coletaPorDia);
@@ -347,21 +363,10 @@ let coordsGrafico = [];
 let labelsGrafico = [];
 let linePoints = [];
 
-function caminhoSuave(pts) {
-  if (pts.length < 2) return pts.length ? "M" + pts[0][0] + " " + pts[0][1] : "";
-  let d = "M" + pts[0][0] + " " + pts[0][1];
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[Math.max(0, i - 1)];
-    const p1 = pts[i];
-    const p2 = pts[i + 1];
-    const p3 = pts[Math.min(pts.length - 1, i + 2)];
-    const c1x = p1[0] + (p2[0] - p0[0]) / 6;
-    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
-    const c2x = p2[0] - (p3[0] - p1[0]) / 6;
-    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
-    d += " C" + c1x.toFixed(1) + " " + c1y.toFixed(1) + ", " + c2x.toFixed(1) + " " + c2y.toFixed(1) + " " + p2[0] + " " + p2[1];
-  }
-  return d;
+/** Linha reta entre os pontos: curvas suaves ultrapassam o zero em dias com pico isolado */
+function caminhoLinear(pts) {
+  if (!pts.length) return "";
+  return "M" + pts.map(([x, y]) => x.toFixed(1) + " " + y.toFixed(1)).join(" L");
 }
 
 function updateDailyChart(points) {
@@ -389,7 +394,7 @@ function updateDailyChart(points) {
     const y = height - (v / max) * (height - 25);
     return [x, y];
   });
-  const linha = caminhoSuave(coordsGrafico);
+  const linha = caminhoLinear(coordsGrafico);
   const paths = svg.querySelectorAll("path");
   if (paths[0]) paths[0].setAttribute("d", linha + " L" + width + " " + height + " L0 " + height + "Z");
   if (paths[1]) paths[1].setAttribute("d", linha);
@@ -404,8 +409,8 @@ function updateDailyChart(points) {
       c.setAttribute("cx", x);
       c.setAttribute("cy", y);
       c.setAttribute("r", i === idxMax ? 8 : 6);
-      c.setAttribute("fill", i === idxMax ? "#22c55e" : "#0f172a");
-      c.setAttribute("stroke", i === idxMax ? "#fff" : "#2563eb");
+      c.style.fill = i === idxMax ? "var(--success)" : "var(--bg-panel)";
+      c.style.stroke = i === idxMax ? "var(--success)" : "var(--primary)";
       c.setAttribute("stroke-width", i === idxMax ? 3 : 2);
       c.setAttribute("class", i === idxMax ? "max-dot" : "");
       circlesGroup.appendChild(c);
@@ -418,7 +423,7 @@ function updateDailyChart(points) {
     if (media > 0) {
       avgEl.hidden = false;
       avgEl.style.display = "block";
-      avgEl.style.bottom = (20 + (media / max) * 70).toFixed(2) + "%";
+      avgEl.style.bottom = ((media / max) * 100).toFixed(2) + "%";
       const rot = avgEl.querySelector("span");
       if (rot) rot.textContent = "média " + Math.round(media) + " un";
     } else {
@@ -427,49 +432,35 @@ function updateDailyChart(points) {
     }
   }
 
-  const chartArea = document.querySelector(".chart-area");
-  if (chartArea && !chartArea._listener) {
+  const chartPlot = document.querySelector(".chart-plot");
+  if (chartPlot && !chartPlot._listener) {
     const guide = document.createElement("div");
-    guide.className = "avg-line guide-line";
-    guide.style.borderTop = "1px solid var(--primary)";
-    guide.style.left = "40px";
-    guide.style.right = "0";
-    guide.style.pointerEvents = "none";
-    guide.style.zIndex = "10";
-    guide.hidden = true;
-    chartArea.appendChild(guide);
+    guide.style.cssText = "position:absolute;top:0;bottom:0;width:1px;border-left:1px dashed var(--primary);pointer-events:none;z-index:4;display:none";
+    chartPlot.appendChild(guide);
 
     const hoverDot = document.createElement("div");
-    hoverDot.style.position = "absolute";
-    hoverDot.style.width = "10px";
-    hoverDot.style.height = "10px";
-    hoverDot.style.borderRadius = "50%";
-    hoverDot.style.background = "var(--primary)";
-    hoverDot.style.transform = "translate(-50%, -50%)";
-    hoverDot.style.opacity = "0";
-    hoverDot.style.transition = "opacity 0.15s ease";
-    hoverDot.style.pointerEvents = "none";
-    hoverDot.style.zIndex = "15";
-    chartArea.appendChild(hoverDot);
-    chartArea._listener = true;
+    hoverDot.style.cssText = "position:absolute;width:11px;height:11px;border-radius:50%;background:var(--primary);border:2px solid var(--bg-panel);transform:translate(-50%,-50%);opacity:0;transition:opacity .15s ease;pointer-events:none;z-index:6";
+    chartPlot.appendChild(hoverDot);
+    chartPlot._listener = true;
 
-    chartArea.addEventListener("mousemove", (e) => {
+    chartPlot.addEventListener("mousemove", (e) => {
       if (!coordsGrafico.length) { esconderTooltip(); return; }
-      const rect = chartArea.getBoundingClientRect();
+      const rect = chartPlot.getBoundingClientRect();
       const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
       const idx = Math.round(ratio * (coordsGrafico.length - 1));
       const [x, y] = coordsGrafico[idx];
       const px = (x / 700) * rect.width;
-      const py = (y / 250) * rect.height;
-      if (guide) { guide.hidden = false; guide.style.display = "block"; guide.style.left = px + "px"; }
+      const py = (y / 200) * rect.height;
+      guide.style.display = "block";
+      guide.style.left = px + "px";
       hoverDot.style.left = px + "px";
       hoverDot.style.top = py + "px";
       hoverDot.style.opacity = "1";
       const point = points[idx];
       mostrarTooltip(tooltipDetalhe(point, diaSemana(labelsGrafico[idx])), e);
     });
-    chartArea.addEventListener("mouseleave", () => {
-      if (guide) { guide.hidden = true; guide.style.display = "none"; }
+    chartPlot.addEventListener("mouseleave", () => {
+      guide.style.display = "none";
       hoverDot.style.opacity = "0";
       esconderTooltip();
     });
@@ -544,13 +535,19 @@ function renderBarras(period) {
       const papel = Number(point.papel || 0);
       const plastico = Number(point.plastico || 0);
       const vidro = Number(point.vidro || 0);
-      const seg = (v, cls, cor) => v > 0 ? '<div class="bar-segment ' + cls + '" style="height:' + ((v / max) * 100).toFixed(2) + '%;background:' + cor + '"></div>' : "";
+      const seg = (v, cls) => v > 0
+        ? `<div class="bar-segment ${cls}" style="height:${((v / max) * 100).toFixed(2)}%"></div>`
+        : "";
+      const miolo = un > 0
+        ? seg(papel, "papel") + seg(plastico, "plastico") + seg(vidro, "vidro")
+        : '<div class="bar-segment bar-zero"></div>';
       const destaque = i === idxMax ? " bar-column-max" : "";
-      return '<div class="bar-column' + destaque + '" style="cursor:crosshair" onmouseover="mostrarTooltipBarras(this, ' + i + ", '" + period + "'" + ')" onmouseout="esconderTooltip()">' +
-        '<div class="bar-value">' + (un > 0 ? un.toLocaleString("pt-BR") : "") + '</div>' +
-        '<div class="bar-stack">' + seg(papel, "papel", "#3b82f6") + seg(plastico, "plastico", "#10b981") + seg(vidro, "vidro", "#f59e0b") + '</div>' +
-        '<div class="bar-label">' + escapeHtml(point.label ?? "—") + '</div>' +
-        '</div>';
+      return `<div class="bar-column${destaque}" style="cursor:crosshair"
+          onmouseover="mostrarTooltipBarras(this, ${i}, '${period}')" onmouseout="esconderTooltip()">
+        <div class="bar-value">${un.toLocaleString("pt-BR")}</div>
+        <div class="bar-stack">${miolo}</div>
+        <div class="bar-label">${escapeHtml(point.label ?? "—")}</div>
+      </div>`;
     }).join("");
   }
 }

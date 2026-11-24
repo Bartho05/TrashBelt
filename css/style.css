@@ -374,7 +374,7 @@ a {
    ===================================================================== */
 
 .line-chart-wrap {
-    height: 260px;
+    height: 280px;
     position: relative;
 }
 
@@ -383,23 +383,40 @@ a {
     height: 100%;
 }
 
+/* Área exata do gráfico — rótulos dos eixos ficam FORA dela */
+.chart-plot {
+    position: absolute;
+    left: 46px;
+    right: 0;
+    top: 0;
+    bottom: 26px;
+}
+
 .y-labels {
     position: absolute;
     left: 0;
+    width: 40px;
     top: 0;
-    bottom: 0;
+    bottom: 26px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding-right: 8px;
+    align-items: flex-end;
     font-size: 0.75rem;
     color: var(--text-muted);
     font-family: var(--font-mono);
+    pointer-events: none;
+}
+
+.grid-lines {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
 }
 
 .gridline {
     position: absolute;
-    left: 40px;
+    left: 0;
     right: 0;
     height: 1px;
     background: var(--border-light);
@@ -411,49 +428,54 @@ a {
 .gridline:nth-child(4) { top: 75%; }
 .gridline:nth-child(5) { bottom: 0; }
 
-.line-chart svg {
+.line-chart-wrap svg {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     display: block;
-    overflow: visible;
 }
 
-.line-chart path.line-path {
+.line-chart-wrap path.line-path,
+.line-chart-wrap path.area-path {
+    vector-effect: non-scaling-stroke;
+}
+
+.line-chart-wrap path.line-path {
     fill: none;
     stroke: var(--primary);
     stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
-    filter: drop-shadow(0 4px 6px rgb(37 99 235 / 0.2));
 }
 
-.line-chart path.area-path {
+.line-chart-wrap path.area-path {
     fill: url(#area-gradient);
-    opacity: 0.1;
+    opacity: 0.9;
 }
 
 .x-labels {
     position: absolute;
-    left: 40px;
+    left: 46px;
     right: 0;
     bottom: 0;
+    height: 22px;
     display: flex;
     justify-content: space-between;
+    align-items: flex-end;
     font-size: 0.75rem;
     color: var(--text-muted);
     font-family: var(--font-mono);
-    padding-bottom: 4px;
+    pointer-events: none;
 }
 
 .avg-line {
     position: absolute;
-    left: 40px;
+    left: 0;
     right: 0;
     border-top: 2px dashed var(--success);
     pointer-events: none;
-    z-index: 10;
+    z-index: 5;
 }
 
 .avg-line span {
@@ -489,20 +511,31 @@ a {
 }
 
 .donut {
+    position: relative;
     width: 200px;
     height: 200px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    cursor: crosshair;
+}
+
+/* O anel é mascarado; o texto fica FORA da máscara, por cima */
+.donut-ring {
+    position: absolute;
+    inset: 0;
     border-radius: 50%;
     background: conic-gradient(var(--border-light) 0deg 360deg);
     -webkit-mask: radial-gradient(closest-side, transparent 70%, #000 71%);
     mask: radial-gradient(closest-side, transparent 70%, #000 71%);
-    display: grid;
-    place-items: center;
     transition: background 0.6s ease;
-    cursor: crosshair;
 }
 
 .donut-content {
+    position: relative;
+    z-index: 1;
     text-align: center;
+    pointer-events: none;
 }
 
 .donut-value {
@@ -623,15 +656,17 @@ a {
     display: flex;
     gap: 1rem;
     height: 200px;
-    align-items: flex-end;
+    align-items: stretch;
 }
 
+/* Grid com altura explícita na linha do meio: evita bar-stack com altura 0 */
 .bar-column {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
+    min-width: 0;
+    display: grid;
+    grid-template-rows: 18px minmax(0, 1fr) 18px;
+    justify-items: center;
+    gap: 0.35rem;
 }
 
 .bar-value {
@@ -639,15 +674,18 @@ a {
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--text-secondary);
-    min-height: 1.25rem;
+    align-self: end;
+    line-height: 18px;
 }
 
 .bar-stack {
-    width: 44px;
+    width: min(44px, 100%);
     height: 100%;
+    min-height: 0;
+    align-self: end;
     border-radius: 8px 8px 4px 4px;
     overflow: hidden;
-    background: var(--border-light);
+    border-bottom: 2px solid var(--border);
     position: relative;
     display: flex;
     flex-direction: column-reverse;
@@ -656,6 +694,11 @@ a {
 .bar-segment {
     width: 100%;
     transition: height 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.bar-segment.bar-zero {
+    background: var(--border-light);
+    flex: 0 0 3px;
 }
 
 .bar-segment.papel { background: var(--papel); }
@@ -670,6 +713,18 @@ a {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
+    align-self: start;
+    line-height: 18px;
+}
+
+.bar-column-max .bar-value { color: var(--primary); }
+.bar-column-max .bar-stack { box-shadow: 0 0 0 2px var(--primary-light); }
+
+.charts-layout {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 2rem;
+    align-items: start;
 }
 
 .bars-legend {
@@ -1194,8 +1249,13 @@ tbody tr:hover {
         grid-column: 1 / -1;
     }
     
-    .monitor-wrap {
+    .monitor-wrap,
+    .charts-layout {
         grid-template-columns: 1fr;
+    }
+    
+    .charts-layout {
+        gap: 1.5rem;
     }
     
     .main {
@@ -1241,6 +1301,21 @@ tbody tr:hover {
     
     .bars-grid {
         height: 160px;
+        gap: 0.35rem;
+    }
+    
+    .bar-stack {
+        width: min(30px, 100%);
+    }
+    
+    .bar-value,
+    .bar-label {
+        font-size: 0.625rem;
+    }
+    
+    .bars-legend {
+        gap: 0.875rem;
+        font-size: 0.75rem;
     }
     
     .header-content {
