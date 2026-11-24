@@ -119,11 +119,15 @@ navItems.forEach(item => {
 /* Menu mobile */
 const menuBtn = document.querySelector(".menu-btn");
 const sidebar = document.querySelector(".sidebar");
+const backdrop = document.querySelector(".sidebar-backdrop");
 menuBtn?.addEventListener("click", () => {
   const isOpen = document.body.classList.toggle("menu-open");
   sidebar?.classList.toggle("open", isOpen);
+  sidebar?.style.transform = isOpen ? "none" : "translateX(-100%)";
+  backdrop?.style.opacity = isOpen ? "1" : "0";
+  backdrop?.style.pointerEvents = isOpen ? "auto" : "none";
 });
-document.querySelector(".sidebar-backdrop")?.addEventListener("click", closeMenu);
+backdrop?.addEventListener("click", closeMenu);
 
 /* Botão do hero */
 document.querySelectorAll("[data-goto]").forEach(btn => {
