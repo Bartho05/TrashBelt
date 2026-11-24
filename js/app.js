@@ -123,9 +123,11 @@ const backdrop = document.querySelector(".sidebar-backdrop");
 menuBtn?.addEventListener("click", () => {
   const isOpen = document.body.classList.toggle("menu-open");
   sidebar?.classList.toggle("open", isOpen);
-  sidebar?.style.transform = isOpen ? "none" : "translateX(-100%)";
-  backdrop?.style.opacity = isOpen ? "1" : "0";
-  backdrop?.style.pointerEvents = isOpen ? "auto" : "none";
+  if (sidebar) sidebar.style.transform = isOpen ? "none" : "translateX(-100%)";
+  if (backdrop) {
+    backdrop.style.opacity = isOpen ? "1" : "0";
+    backdrop.style.pointerEvents = isOpen ? "auto" : "none";
+  }
 });
 backdrop?.addEventListener("click", closeMenu);
 
