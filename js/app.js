@@ -220,10 +220,19 @@ function atualizarDashboard(data) {
     if (validTotal) {
       const a = ((papel || 0) / total) * 360;
       const b = a + ((plastico || 0) / total) * 360;
-      ring.style.background = "conic-gradient(" +
-        "var(--papel) 0deg " + a.toFixed(2) + "deg," +
-        "var(--plastico) " + a.toFixed(2) + "deg " + b.toFixed(2) + "deg," +
-        "var(--vidro) " + b.toFixed(2) + "deg 360deg)";
+      const comEspaco = papel > 0 && plastico > 0 && vidro > 0;
+      const gap = 1.4;
+      ring.style.background = comEspaco
+        ? "conic-gradient(" +
+          "var(--papel) 0deg " + (a - gap).toFixed(2) + "deg," +
+          "transparent " + (a - gap).toFixed(2) + "deg " + (a + gap).toFixed(2) + "deg," +
+          "var(--plastico) " + (a + gap).toFixed(2) + "deg " + (b - gap).toFixed(2) + "deg," +
+          "transparent " + (b - gap).toFixed(2) + "deg " + (b + gap).toFixed(2) + "deg," +
+          "var(--vidro) " + (b + gap).toFixed(2) + "deg 360deg)"
+        : "conic-gradient(" +
+          "var(--papel) 0deg " + a.toFixed(2) + "deg," +
+          "var(--plastico) " + a.toFixed(2) + "deg " + b.toFixed(2) + "deg," +
+          "var(--vidro) " + b.toFixed(2) + "deg 360deg)";
     } else {
       ring.style.background = "conic-gradient(var(--border-light) 0deg 360deg)";
     }
@@ -391,7 +400,7 @@ function updateDailyChart(points) {
   const height = 200;
   coordsGrafico = values.map((v, i) => {
     const x = values.length === 1 ? 0 : (i / (values.length - 1)) * width;
-    const y = height - (v / max) * (height - 25);
+    const y = height - (v / topo) * (height - 25);
     return [x, y];
   });
   const linha = caminhoLinear(coordsGrafico);
@@ -415,6 +424,17 @@ function updateDailyChart(points) {
       c.setAttribute("class", i === idxMax ? "max-dot" : "");
       circlesGroup.appendChild(c);
     });
+
+    if (idxMax >= 0 && maior > 0) {
+      const [mx, my] = coordsGrafico[idxMax];
+      const rotulo = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      rotulo.setAttribute("x", mx.toFixed(1));
+      rotulo.setAttribute("y", (my - 16).toFixed(1));
+      rotulo.setAttribute("text-anchor", mx < 40 ? "start" : (mx > width - 40 ? "end" : "middle"));
+      rotulo.setAttribute("class", "max-label");
+      rotulo.textContent = maior.toLocaleString("pt-BR") + " un";
+      circlesGroup.appendChild(rotulo);
+    }
   }
 
   const media = values.reduce((s, v) => s + v, 0) / values.length;
@@ -423,7 +443,7 @@ function updateDailyChart(points) {
     if (media > 0) {
       avgEl.hidden = false;
       avgEl.style.display = "block";
-      avgEl.style.bottom = ((media / max) * 100).toFixed(2) + "%";
+      avgEl.style.bottom = ((media / topo) * 100).toFixed(2) + "%";
       const rot = avgEl.querySelector("span");
       if (rot) rot.textContent = "média " + Math.round(media) + " un";
     } else {

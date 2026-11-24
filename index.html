@@ -1,13 +1,139 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trashbelt — Redirecionando…</title>
-  <meta http-equiv="refresh" content="0; url=dashboard.html">
-  <link rel="canonical" href="dashboard.html">
+  <meta name="theme-color" content="#0f172a">
+  <title>Trashbelt — Tecnologia que separa, dados que transformam</title>
+  <meta name="description" content="Sistema inteligente de separação e monitoramento de resíduos com dados em tempo real.">
+  <link rel="canonical" href="index.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=21">
+
+  <script>
+    try {
+      var t = localStorage.getItem("trashbelt-tema");
+      document.documentElement.dataset.theme = (t === "light") ? "light" : "dark";
+    } catch (e) {
+      document.documentElement.dataset.theme = "dark";
+    }
+  </script>
 </head>
-<body>
-  <p>Redirecionando para o painel… <a href="dashboard.html">clique aqui se não redirecionar automaticamente</a></p>
+<body class="landing">
+  <div class="main">
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="hero-eyebrow"><span class="live-dot"></span> Monitoramento em tempo real</span>
+        <h1>O lixo vira dado.<br>O dado vira<br><span style="color:var(--success)">mudança.</span></h1>
+        <p class="hero-lead">A Trashbelt é uma esteira inteligente que separa resíduos automaticamente e transforma cada coleta em informação clara. Acompanhe volumes, materiais e tendências — tudo no painel, ao vivo.</p>
+        <div class="hero-actions">
+          <a href="dashboard.html" class="btn btn-primary">Explorar painel <span aria-hidden="true">→</span></a>
+          <a href="#como-funciona" class="btn btn-ghost">Como funciona</a>
+        </div>
+        <div class="hero-meta">
+          <div class="hero-meta-item"><strong id="hero-total">—</strong><span>un coletadas</span></div>
+          <div class="hero-meta-item"><strong>3</strong><span>materiais</span></div>
+          <div class="hero-meta-item"><strong id="hero-atualizacao">—</strong><span>atualizado em</span></div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="float-chip one">● Sistema online</div>
+        <div class="preview-card panel">
+          <div class="preview-top">
+            <span>Resumo da coleta</span>
+            <span class="chip">un</span>
+          </div>
+          <div class="preview-total" id="hero-total-card">—</div>
+          <div class="preview-sub">Volume total registrado pela esteira</div>
+          <div class="mini-bars" id="hero-bars">
+            <div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div>
+            <div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div>
+            <div class="mini-bar"></div>
+          </div>
+          <div class="preview-mats">
+            <div class="preview-mat"><small>Papel</small><b id="hero-papel">—</b></div>
+            <div class="preview-mat"><small>Plástico</small><b id="hero-plastico">—</b></div>
+            <div class="preview-mat"><small>Vidro</small><b id="hero-vidro">—</b></div>
+          </div>
+        </div>
+        <div class="float-chip two">↑ Dados ao vivo</div>
+      </div>
+    </section>
+
+    <section class="section" id="recursos">
+      <div class="section-head">
+        <span class="eyebrow">Recursos</span>
+        <h2>Tudo o que você precisa para acompanhar</h2>
+        <p>Do sensor ao gráfico: uma plataforma completa para entender o que a esteira coleta, sem planilhas e sem complicação.</p>
+      </div>
+      <div class="features-grid">
+        <article class="feature-card panel">
+          <div class="feature-icon">
+            <svg class="icon" aria-hidden="true"><use href="#i-monitor"/></svg>
+          </div>
+          <h3>Tempo real</h3>
+          <p>Veja a esteira operando e os sensores respondendo. Os dados são atualizados a cada 10 segundos.</p>
+        </article>
+        <article class="feature-card panel">
+          <div class="feature-icon">
+            <svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>
+          </div>
+          <h3>Gráficos claros</h3>
+          <p>Linhas, roscas e barras empilhadas que mostram tendências por dia, semana e mês sem ruído visual.</p>
+        </article>
+        <article class="feature-card panel">
+          <div class="feature-icon">
+            <svg class="icon" aria-hidden="true"><use href="#i-history"/></svg>
+          </div>
+          <h3>Histórico completo</h3>
+          <p>Filtre e ordene cada coleta por material, horário e status. O dado bruto também está a um clique.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="como-funciona">
+      <div class="section-head">
+        <span class="eyebrow">Como funciona</span>
+        <h3 style="font-size:clamp(1.6rem,3vw,2.15rem);letter-spacing:-1px;margin-bottom:.5rem">Três passos, zero mistério</h3>
+        <p>Da separação física à visualização: cada etapa foi pensada para ser simples, auditável e escalável.</p>
+      </div>
+      <div class="steps">
+        <article class="step panel">
+          <h3>A esteira separa</h3>
+          <p>Sensores identificam papel, plástico e vidro conforme os itens passam pela esteira.</p>
+        </article>
+        <article class="step panel">
+          <h3>O backend registra</h3>
+          <p>Cada leitura é validada e enviada ao banco com acesso restrito e regras de integridade.</p>
+        </article>
+        <article class="step panel">
+          <h3>Você acompanha</h3>
+          <p>O painel traduz tudo em gráficos e indicadores, no celular ou no computador.</p>
+        </article>
+      </div>
+      <div class="tech-row">
+        <span class="tech-pill">ESP32</span>
+        <span class="tech-pill">PHP / Node</span>
+        <span class="tech-pill">Supabase</span>
+        <span class="tech-pill">Vercel</span>
+        <span class="tech-pill">HTML · CSS · JS</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="cta-band panel">
+        <h2>Pronto para ver os dados?</h2>
+        <p>Entre no painel e acompanhe a coleta da Trashbelt agora mesmo.</p>
+        <a href="dashboard.html" class="btn btn-primary">Abrir painel <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+  </div>
+
+  <div class="tooltip" id="tooltip" hidden></div>
+  <script src="js/shell.js?v=21"></script>
+  <script src="js/app.js?v=21"></script>
 </body>
 </html>

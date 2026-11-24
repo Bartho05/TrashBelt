@@ -18,7 +18,7 @@
 
 ## 🎯 Objetivo do Projeto
 
-Desenvolver uma esteira automatizada que classifica objetos recicláveis — papel, plástico e vidro — por meio de leitura de cores e direciona cada material à sua trilha de destino, acompanhada de um painel web que registra e exibe cada coleta em tempo real, com gráficos por período, histórico, meta mensal e notificações.
+Desenvolver uma esteira automatizada que classifica objetos recicláveis — papel, plástico e vidro — por meio de leitura de cores e direciona cada material à sua trilha de destino, acompanhada de um site que registra e exibe cada coleta em tempo real, com landing page, gráficos por período, histórico e meta mensal.
 
 ---
 
@@ -47,13 +47,16 @@ Uma esteira equipada com ESP32, sensor de cores TCS34725, três servomotores e s
 
 ### Funcionalidades Principais
 
-- [x] Painel web com atualização automática a cada 10 s (polling)
+- [x] Landing page institucional com dados reais da coleta
+- [x] Site com páginas separadas e navegação por sidebar (drawer no celular)
+- [x] Atualização automática a cada 10 s (polling)
 - [x] Totais em tempo real: geral + papel, plástico e vidro (em "un")
-- [x] Gráficos de coleta por dia, semana e mês (barras empilhadas por material)
+- [x] Gráficos de coleta por dia, semana e mês (linha, rosca e barras empilhadas)
 - [x] Histórico de coletas com filtro por material e ordenação por qualquer coluna
-- [x] Notificações de coletas novas (badge no sino + toasts)
 - [x] Meta mensal com barra de progresso e variação percentual
-- [x] Tema claro/escuro persistente e atalhos de teclado (1–4, T)
+- [x] Rodapé completo com links de navegação e recursos
+- [x] Tema claro/escuro persistente
+- [x] Visual glassmorphism com aurora de fundo e cards translúcidos
 - [x] Firmware: classificação por cor, abertura do servo e confirmação por sensor
 - [x] Contadores do firmware salvos na memória permanente (NVS) — sobrevivem a reinícios
 - [x] Comandos via Monitor Serial: STATUS, ZERAR, AJUDA
@@ -77,9 +80,16 @@ Uma esteira equipada com ESP32, sensor de cores TCS34725, três servomotores e s
 
 ```
 Trashbelt/
-├── index.html                  # Painel (interface única, responsiva)
-├── css/style.css               # Estilos (tema claro/escuro)
-├── js/app.js                   # Gráficos, tooltips, toasts, atalhos
+├── index.html                  # Landing page (apresentação + resumo ao vivo)
+├── dashboard.html              # Visão geral: cards, linha, rosca e barras
+├── monitor.html                # Esteira animada e status dos sensores
+├── charts.html                 # Gráficos e comparação por material
+├── history.html                # Tabela filtrável e ordenável
+├── css/style.css               # Estilos, temas, sidebar e glassmorphism
+├── js/app.js                   # Dados, gráficos, tooltips e temas
+├── js/shell.js                 # Sidebar, drawer mobile e rodapé
+├── vercel.json                 # Rotas e build da Vercel
+├── .env.example                # Modelo das variáveis de ambiente
 ├── api/
 │   ├── dashboard.php           # Endpoint público (JSON, cache de 5s)
 │   ├── supabase.php            # Cliente REST do Supabase (cURL)
@@ -100,14 +110,14 @@ Trashbelt/
 
 ## 🧪 Requisitos Funcionais
 
-- RF01 – O painel deve exibir em tempo real o total coletado e o detalhamento por material (papel, plástico, vidro)
-- RF02 – O painel deve apresentar gráficos de coleta por dia, semana e mês
+- RF01 – O site deve exibir em tempo real o total coletado e o detalhamento por material (papel, plástico, vidro)
+- RF02 – O site deve apresentar gráficos de coleta por dia, semana e mês
 - RF03 – O histórico deve permitir filtro por material e ordenação por qualquer coluna
 - RF04 – Cada separação concluída deve ser registrada no banco (estado atual + histórico)
 - RF05 – O firmware deve classificar o objeto pela cor e abrir a trilha do destino correspondente
 - RF06 – O objeto só deve ser contabilizado após a confirmação do sensor de destino
-- RF07 – O painel deve notificar o usuário quando chegarem coletas novas
-- RF08 – O painel deve permitir alternar entre tema claro e escuro
+- RF07 – A navegação deve funcionar em desktop (sidebar fixa) e celular (drawer com botão de menu)
+- RF08 – O site deve permitir alternar entre tema claro e escuro
 
 ---
 
@@ -156,8 +166,10 @@ O painel é público para consulta via navegador e **não há login de usuários
 
 ## 📷 Protótipos / Telas
 
-O painel em funcionamento roda localmente: `http://localhost/Trashbelt/`
-*(adicionar aqui capturas de tela do painel, gráficos e da esteira física)*
+O site em funcionamento roda localmente: `http://localhost/Trashbelt/`
+
+Páginas: landing (`/`), visão geral (`/dashboard.html`), monitoramento (`/monitor.html`), gráficos (`/charts.html`) e histórico (`/history.html`).
+*(adicionar aqui capturas de tela da landing, dos gráficos, da sidebar e da esteira física)*
 
 ---
 
