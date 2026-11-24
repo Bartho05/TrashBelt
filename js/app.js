@@ -385,6 +385,44 @@ let coordsGrafico = [];
 let labelsGrafico = [];
 let linePoints = [];
 
+/** No celular, "17/11" vira "17": os 7 rótulos passam a caber sem se sobrepor. */
+const consultaMobile = typeof window.matchMedia === "function"
+  ? window.matchMedia("(max-width: 640px)")
+  : null;
+
+function rotuloEixoX(label) {
+  const texto = String(label ?? "—");
+  if (!consultaMobile || !consultaMobile.matches) return texto;
+  const soDia = /^(\d{1,2})\/\d{1,2}$/.exec(texto);
+  return soDia ? soDia[1] : texto;
+}
+
+function aplicarRotulosEixoX() {
+  const visiveis = document.querySelectorAll(".x-labels span");
+  if (!visiveis.length) return;
+  const pontos = linePoints.slice(-visiveis.length);
+  visiveis.forEach((el, i) => {
+    el.textContent = pontos[i] ? rotuloEixoX(pontos[i].label ?? "—") : "—";
+  });
+}
+
+// Atualiza o formato dos rótulos ao girar o celular ou redimensionar a janela
+window.addEventListener("resize", aplicarRotulosEixoX, { passive: true });
+window.addEventListener("orientationchange", aplicarRotulosEixoX, { passive: true });
+if (consultaMobile) {
+  if (typeof consultaMobile.addEventListener === "function") {
+    consultaMobile.addEventListener("change", aplicarRotulosEixoX);
+  } else if (typeof consultaMobile.addListener === "function") {
+    consultaMobile.addListener(aplicarRotulosEixoX); // Safari antigo
+  }
+}
+
+// No toque, fecha o tooltip ao tocar fora dos gráficos
+document.addEventListener("touchstart", (e) => {
+  const alvo = e.target && e.target.closest ? e.target.closest(".bar-column, .chart-plot") : null;
+  if (!alvo) esconderTooltip();
+}, { passive: true });
+
 /** Linha reta entre os pontos: curvas suaves ultrapassam o zero em dias com pico isolado */
 function caminhoLinear(pts) {
   if (!pts.length) return "";
@@ -394,8 +432,7 @@ function caminhoLinear(pts) {
 function updateDailyChart(points) {
   linePoints = points;
   labelsGrafico = points.map(p => p.label ?? "—");
-  const labels = document.querySelectorAll(".x-labels span");
-  points.slice(-labels.length).forEach((point, i) => { if (labels[i]) labels[i].textContent = point.label ?? "—"; });
+  aplicarRotulosEixoX();
 
   const values = points.map(p => Number(p.un || 0));
   if (!values.length) return;
@@ -476,10 +513,10 @@ function updateDailyChart(points) {
     chartPlot.appendChild(hoverDot);
     chartPlot._listener = true;
 
-    chartPlot.addEventListener("mousemove", (e) => {
+    const mostrarPonto = (clientX, clientY, origem) => {
       if (!coordsGrafico.length) { esconderTooltip(); return; }
       const rect = chartPlot.getBoundingClientRect();
-      const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+      const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
       const idx = Math.round(ratio * (coordsGrafico.length - 1));
       const [x, y] = coordsGrafico[idx];
       const px = (x / 700) * rect.width;
@@ -489,14 +526,25 @@ function updateDailyChart(points) {
       hoverDot.style.left = px + "px";
       hoverDot.style.top = py + "px";
       hoverDot.style.opacity = "1";
-      const point = points[idx];
-      mostrarTooltip(tooltipDetalhe(point, diaSemana(labelsGrafico[idx])), e);
-    });
-    chartPlot.addEventListener("mouseleave", () => {
+      mostrarTooltip(
+        tooltipDetalhe(linePoints[idx], diaSemana(labelsGrafico[idx])),
+        origem || { clientX, clientY }
+      );
+    };
+    const esconderPonto = () => {
       guide.style.display = "none";
       hoverDot.style.opacity = "0";
       esconderTooltip();
-    });
+    };
+    const aoTocar = (e) => {
+      const t = e.touches && e.touches[0];
+      if (t) mostrarPonto(t.clientX, t.clientY, { clientX: t.clientX, clientY: t.clientY });
+    };
+    chartPlot.addEventListener("mousemove", (e) => mostrarPonto(e.clientX, e.clientY, e));
+    chartPlot.addEventListener("mouseleave", esconderPonto);
+    chartPlot.addEventListener("touchstart", aoTocar, { passive: true });
+    chartPlot.addEventListener("touchmove", aoTocar, { passive: true });
+    chartPlot.addEventListener("touchend", esconderPonto, { passive: true });
   }
 }
 
@@ -576,7 +624,8 @@ function renderBarras(period) {
         : '<div class="bar-segment bar-zero"></div>';
       const destaque = i === idxMax ? " bar-column-max" : "";
       return `<div class="bar-column${destaque}" style="cursor:crosshair"
-          onmouseover="mostrarTooltipBarras(this, ${i}, '${period}')" onmouseout="esconderTooltip()">
+          onmouseover="mostrarTooltipBarras(this, ${i}, '${period}')" onmouseout="esconderTooltip()"
+          onclick="event.stopPropagation(); mostrarTooltipBarras(this, ${i}, '${period}')">
         <div class="bar-value">${un.toLocaleString("pt-BR")}</div>
         <div class="bar-stack">${miolo}</div>
         <div class="bar-label">${escapeHtml(point.label ?? "—")}</div>

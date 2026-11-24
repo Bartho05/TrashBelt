@@ -630,6 +630,13 @@ html[data-theme="light"] .i-lua { display: block }
 .line-chart-wrap circle { filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4)) }
 .line-chart-wrap circle.max-dot { filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.8)) }
 
+/* Dica de interação: mouse no desktop, toque no celular/tablet */
+.hint-touch { display: none }
+@media (hover: none) {
+    .hint-mouse { display: none }
+    .hint-touch { display: inline }
+}
+
 .x-labels {
     position: absolute;
     left: 46px;
@@ -1852,6 +1859,12 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
     .stat-card { padding: 1.2rem }
     .panel { padding: 1.15rem; border-radius: 16px }
     .line-chart-wrap { height: 230px }
+    /* Eixo X mais estreito e rótulos curtos: cabe até em 320px */
+    .chart-plot { left: 36px }
+    .x-labels { left: 36px; font-size: 0.66rem }
+    .y-labels { width: 32px; font-size: 0.66rem }
+    /* O texto SVG distorce com preserveAspectRatio="none" em telas estreitas */
+    .line-chart-wrap .max-label { display: none }
     .donut-wrap { flex-direction: column; gap: 1.2rem }
     .donut { width: 165px; height: 165px }
     .donut-legend { width: 100% }
