@@ -102,7 +102,8 @@
   /* ---------------- Painel: sidebar + drawer ---------------- */
 
   function renderSidebar() {
-    const links = navItems.map(item => `
+    // "Início" fica só na navbar da landing; na sidebar o retorno é o link "Landing page".
+    const links = navItems.filter(item => item.key !== "index").map(item => `
       <a href="${item.href}" class="side-link ${item.key === page ? "active" : ""}">
         ${icon(item.icon)}<span>${item.label}</span>
       </a>`).join("");
@@ -222,25 +223,34 @@
       .then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))
       .then(data => {
         const valor = Number(data.totalUn ?? 0);
-        animarNumero(total, valor);
+        const formatado = valor.toLocaleString("pt-BR");
+        total.textContent = formatado;
         const card = document.getElementById("hero-total-card");
-        if (card) card.textContent = valor.toLocaleString("pt-BR");
+        if (card) card.textContent = formatado;
         const papel = Number(data.papelUn || 0);
         const plastico = Number(data.plasticoUn || 0);
         const vidro = Number(data.vidroUn || 0);
         setTxt("hero-papel", papel);
         setTxt("hero-plastico", plastico);
         setTxt("hero-vidro", vidro);
-        const stats = [papel, plastico, vidro];
-        const max = Math.max(...stats, 1);
+
+        // As 7 barras representam os 7 dias reais, não uma repetição dos materiais.
+        const diarios = Array.isArray(data.coletaPorDia)
+          ? data.coletaPorDia.map(p => Number(p.un || 0)) : [];
+        const serie = diarios.length ? diarios : [papel, plastico, vidro];
+        const max = Math.max(...serie, 1);
         document.querySelectorAll("#hero-bars .mini-bar").forEach((b, i) => {
-          const v = stats[i % stats.length] || 0;
+          const v = Number(serie[i % serie.length]) || 0;
           b.style.height = Math.max(3, (v / max) * 95) + "px";
-          if (v === 0) b.classList.add("zero");
+          b.classList.toggle("zero", v === 0);
+          b.title = String(v) + " un";
         });
+
         const meta = document.getElementById("hero-atualizacao");
         if (meta) meta.textContent = data.ultimaAtualizacao
-          ? new Date(data.ultimaAtualizacao).toLocaleString("pt-BR") : "agora";
+          ? new Date(data.ultimaAtualizacao).toLocaleString("pt-BR", {
+              day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+            }) : "agora";
       })
       .catch(() => { /* landing segue estática se a API falhar */ });
   }
@@ -248,17 +258,6 @@
   function setTxt(id, value) {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
-  }
-
-  function animarNumero(el, alvo) {
-    const inicio = performance.now();
-    const dur = 900;
-    function frame(now) {
-      const p = Math.min(1, (now - inicio) / dur);
-      el.textContent = Math.round(alvo * (1 - Math.pow(1 - p, 3))).toLocaleString("pt-BR");
-      if (p < 1) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
   }
 
   function init() {

@@ -1566,6 +1566,11 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
     letter-spacing: 0.09em;
 }
 
+.hero-meta-item strong.hora {
+    font-size: 0.95rem;
+    letter-spacing: -0.4px;
+}
+
 .hero-visual { position: relative }
 
 .hero-visual::before {
@@ -1775,6 +1780,9 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
     .stat-card.total { grid-column: 1 / -1 }
     .hero { grid-template-columns: 1fr; gap: 2.2rem; padding-top: 2rem }
     .hero-visual { max-width: 540px }
+    /* O hero empilha aqui: os chips não podem ultrapassar o card. */
+    .float-chip.one { right: 0 }
+    .float-chip.two { left: 0 }
 }
 
 /* Sidebar vira drawer: funciona no celular de verdade */
@@ -1826,8 +1834,6 @@ tbody tr:hover { background: rgba(127, 145, 180, 0.08) }
     .steps { grid-template-columns: 1fr }
     .footer-inner { grid-template-columns: 1fr; gap: 1.6rem; padding: 2rem 1.2rem }
     .footer-brand { grid-column: auto }
-    .float-chip.one { right: 0 }
-    .float-chip.two { left: 0 }
     .cta-band { padding: 2rem 1.2rem }
     .hero h1 { font-size: 2.35rem; letter-spacing: -1.5px }
     .hero-meta { gap: 1.2rem }
