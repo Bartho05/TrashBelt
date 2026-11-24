@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070b16">
+  <title>Trashbelt — Gráficos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=12">
+
+  <script>
+    try {
+      var t = localStorage.getItem("trashbelt-tema");
+      document.documentElement.dataset.theme = (t === "light") ? "light" : "dark";
+    } catch (e) {
+      document.documentElement.dataset.theme = "dark";
+    }
+  </script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark">T</div>
+      <div>Trashbelt</div>
+    </div>
+    <nav>
+      <a href="dashboard.html" class="nav-btn">Visão geral</a>
+      <a href="monitor.html" class="nav-btn">Monitoramento</a>
+      <a href="charts.html" class="nav-btn active">Gráficos</a>
+      <a href="history.html" class="nav-btn">Histórico</a>
+    </nav>
+    <div class="actions">
+      <button class="theme-btn" aria-label="Alternar tema claro/escuro" onclick="toggleTema()" title="Tema">
+        <svg class="icon i-sol"><use href="#i-sol"/></svg>
+        <svg class="icon i-lua"><use href="#i-lua"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div>
+      <h1 class="section-title">Gráficos</h1>
+      <p class="section-sub">Visualização dos dados de coleta · passe o mouse nas barras</p>
+    </div>
+
+    <div class="chart-cards">
+      <article class="panel big-chart">
+        <div class="panel-head">
+          <div><h3 id="period-titulo">Quantidade de resíduos coletados</h3><p id="period-descricao">Por dia</p></div>
+          <div style="display:flex; gap:6px">
+            <button class="period-tab active" data-period="dia" onclick="setPeriod('dia')">Dia</button>
+            <button class="period-tab" data-period="semana" onclick="setPeriod('semana')">Semana</button>
+            <button class="period-tab" data-period="mes" onclick="setPeriod('mes')">Mês</button>
+          </div>
+        </div>
+        <div class="period-summary"><strong id="period-total"><span class="num">—</span></strong><span>un no período exibido</span></div>
+        <div class="bars empty-bars" id="period-bars">
+          <div><i style="height:0%"></i><span>—</span></div>
+          <div><i style="height:0%"></i><span>—</span></div>
+          <div><i style="height:0%"></i><span>—</span></div>
+          <div><i style="height:0%"></i><span>—</span></div>
+          <div><i style="height:0%"></i><span>—</span></div>
+          <div><i style="height:0%"></i><span>—</span></div>
+          <div><i style="height:0%"></i><span>—</span></div>
+        </div>
+        <div class="stack-legend"><span><i class="sd pa"></i>Papel</span><span><i class="sd pl"></i>Plástico</span><span><i class="sd v"></i>Vidro</span></div>
+        <p class="chart-empty" id="period-empty">Aguardando dados da esteira para exibir as coletas.</p>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head"><div><h3>Comparação</h3><p>Papel × plástico × vidro</p></div></div>
+        <div class="compare">
+          <div><span>Papel</span><div><i id="cmp-papel" style="width:0%"></i></div><b id="cmp-papel-num">—</b></div>
+          <div><span>Plástico</span><div><i id="cmp-plastico" style="width:0%"></i></div><b id="cmp-plastico-num">—</b></div>
+          <div><span>Vidro</span><div><i id="cmp-vidro" style="width:0%"></i></div><b id="cmp-vidro-num">—</b></div>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <footer><span>TRASHBELT • 2026</span><span>Monitoramento de resíduos</span></footer>
+
+  <div class="tooltip" id="tooltip" hidden></div>
+
+  <!-- Sprite SVG -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <defs>
+      <symbol id="i-papel" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+      <symbol id="i-plastico" viewBox="0 0 24 24"><path d="M10 2.5h4"/><path d="M10.5 2.5v3.2L8.5 9v11a1.8 1.8 0 0 0 1.8 1.8h3.4a1.8 1.8 0 0 0 1.8-1.8V9l-2-3.3V2.5"/><path d="M8.5 12.5h7"/></symbol>
+      <symbol id="i-vidro" viewBox="0 0 24 24"><path d="M7 3h10l-1.2 8.2a3.9 3.9 0 0 1-7.6 0z"/><path d="M12 15.2V21"/><path d="M8.5 21h7"/></symbol>
+      <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/></symbol>
+      <symbol id="i-lua" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+    </defs>
+  </svg>
+
+  <script src="js/app.js?v=12"></script>
+</body>
+</html>

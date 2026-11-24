@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070b16">
+  <title>Trashbelt — Visão geral</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=12">
+
+  <script>
+    try {
+      var t = localStorage.getItem("trashbelt-tema");
+      document.documentElement.dataset.theme = (t === "light") ? "light" : "dark";
+    } catch (e) {
+      document.documentElement.dataset.theme = "dark";
+    }
+  </script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark">T</div>
+      <div>Trashbelt</div>
+    </div>
+    <nav>
+      <a href="dashboard.html" class="nav-btn active">Visão geral</a>
+      <a href="monitor.html" class="nav-btn">Monitoramento</a>
+      <a href="charts.html" class="nav-btn">Gráficos</a>
+      <a href="history.html" class="nav-btn">Histórico</a>
+    </nav>
+    <div class="actions">
+      <button class="theme-btn" aria-label="Alternar tema claro/escuro" onclick="toggleTema()" title="Tema">
+        <svg class="icon i-sol"><use href="#i-sol"/></svg>
+        <svg class="icon i-lua"><use href="#i-lua"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div>
+      <h1 class="section-title">Visão geral</h1>
+      <p class="section-sub">Dados registrados pela esteira Trashbelt · atualiza a cada 10s</p>
+    </div>
+
+    <div class="cards">
+      <article class="stat-card total">
+        <div class="card-top"><span>Total coletado</span><b id="var-total">—</b></div>
+        <strong><span class="num" id="num-total">—</span> <small>un</small></strong>
+        <div class="mini-progress"><span id="progress-bar" style="width:0%"></span></div>
+        <p id="meta-texto">Meta mensal: —</p>
+      </article>
+      <article class="stat-card">
+        <div class="material-icon paper"><svg class="icon"><use href="#i-papel"/></svg></div>
+        <span class="stat-label">Papel</span>
+        <strong><span class="num" id="num-papel">—</span> <small>un</small></strong>
+        <p id="pct-papel">Aguardando dados</p>
+      </article>
+      <article class="stat-card">
+        <div class="material-icon plastic"><svg class="icon"><use href="#i-plastico"/></svg></div>
+        <span class="stat-label">Plástico</span>
+        <strong><span class="num" id="num-plastico">—</span> <small>un</small></strong>
+        <p id="pct-plastico">Aguardando dados</p>
+      </article>
+      <article class="stat-card">
+        <div class="material-icon glass"><svg class="icon"><use href="#i-vidro"/></svg></div>
+        <span class="stat-label">Vidro</span>
+        <strong><span class="num" id="num-vidro">—</span> <small>un</small></strong>
+        <p id="pct-vidro">Aguardando dados</p>
+      </article>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap: 20px">
+      <article class="panel">
+        <div class="panel-head">
+          <div><h3>Coleta por dia</h3><p>Últimos 7 dias · passe o mouse no gráfico</p></div>
+          <span class="unit">un</span>
+        </div>
+        <div class="line-chart">
+          <div class="y-labels"><span>—</span><span>—</span><span>—</span><span>—</span><span>0</span><span class="eixo">un</span></div>
+          <div class="chart-area">
+            <div class="gridline"></div><div class="gridline"></div><div class="gridline"></div><div class="gridline"></div><div class="gridline"></div>
+            <div class="guide-line" hidden></div>
+            <div class="avg-line" hidden><span>média — un</span></div>
+            <svg viewBox="0 0 700 250" preserveAspectRatio="xMidYMid meet" aria-label="Gráfico de coleta por dia" style="width:100%;height:100%;display:block">
+              <defs><linearGradient id="area" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#4f7cff" stop-opacity=".28"/><stop offset="100%" stop-color="#4f7cff" stop-opacity="0"/></linearGradient></defs>
+              <path id="area-path" d="M0 200 L700 200 L700 250 L0 250Z" fill="url(#area)" opacity="1"/>
+              <path id="line-path" d="M0 200 L700 200" fill="none" stroke="#5f8bff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              <g id="line-circles" fill="#0b1220" stroke="#5f8bff" stroke-width="4"></g>
+            </svg>
+            <div class="x-labels"><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head"><div><h3>Distribuição dos resíduos</h3><p>Passe o mouse nos materiais</p></div></div>
+        <div class="donut-wrap">
+          <div class="donut"><div><strong><span class="num" id="donut-num">—</span></strong><small id="donut-sub">un total</small></div></div>
+          <div class="legend">
+            <div data-mat="papel" onclick="filtrarMaterial('papel')"><i class="dot paper"></i><span>Papel</span><b id="leg-papel">—</b></div>
+            <div data-mat="plastico" onclick="filtrarMaterial('plastico')"><i class="dot plastic"></i><span>Plástico</span><b id="leg-plastico">—</b></div>
+            <div data-mat="vidro" onclick="filtrarMaterial('vidro')"><i class="dot glass"></i><span>Vidro</span><b id="leg-vidro">—</b></div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="bars empty-bars" id="period-bars">
+      <div><i style="height:0%"></i><span>—</span></div>
+      <div><i style="height:0%"></i><span>—</span></div>
+      <div><i style="height:0%"></i><span>—</span></div>
+      <div><i style="height:0%"></i><span>—</span></div>
+      <div><i style="height:0%"></i><span>—</span></div>
+      <div><i style="height:0%"></i><span>—</span></div>
+      <div><i style="height:0%"></i><span>—</span></div>
+    </div>
+    <div class="stack-legend"><span><i class="sd pa"></i>Papel</span><span><i class="sd pl"></i>Plástico</span><span><i class="sd v"></i>Vidro</span></div>
+    <p class="chart-empty" id="period-empty">Aguardando dados da esteira para exibir as coletas por dia.</p>
+  </div>
+
+  <footer><span>TRASHBELT • 2026</span><span>Monitoramento de resíduos</span></footer>
+
+  <div class="tooltip" id="tooltip" hidden></div>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <!-- Sprite SVG -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <defs>
+      <symbol id="i-papel" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+      <symbol id="i-plastico" viewBox="0 0 24 24"><path d="M10 2.5h4"/><path d="M10.5 2.5v3.2L8.5 9v11a1.8 1.8 0 0 0 1.8 1.8h3.4a1.8 1.8 0 0 0 1.8-1.8V9l-2-3.3V2.5"/><path d="M8.5 12.5h7"/></symbol>
+      <symbol id="i-vidro" viewBox="0 0 24 24"><path d="M7 3h10l-1.2 8.2a3.9 3.9 0 0 1-7.6 0z"/><path d="M12 15.2V21"/><path d="M8.5 21h7"/></symbol>
+      <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/></symbol>
+      <symbol id="i-lua" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+    </defs>
+  </svg>
+
+  <script src="js/app.js?v=12"></script>
+</body>
+</html>

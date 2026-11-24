@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070b16">
+  <title>Trashbelt — Monitoramento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=12">
+
+  <script>
+    try {
+      var t = localStorage.getItem("trashbelt-tema");
+      document.documentElement.dataset.theme = (t === "light") ? "light" : "dark";
+    } catch (e) {
+      document.documentElement.dataset.theme = "dark";
+    }
+  </script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark">T</div>
+      <div>Trashbelt</div>
+    </div>
+    <nav>
+      <a href="dashboard.html" class="nav-btn">Visão geral</a>
+      <a href="monitor.html" class="nav-btn active">Monitoramento</a>
+      <a href="charts.html" class="nav-btn">Gráficos</a>
+      <a href="history.html" class="nav-btn">Histórico</a>
+    </nav>
+    <div class="actions">
+      <button class="theme-btn" aria-label="Alternar tema claro/escuro" onclick="toggleTema()" title="Tema">
+        <svg class="icon i-sol"><use href="#i-sol"/></svg>
+        <svg class="icon i-lua"><use href="#i-lua"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div>
+      <h1 class="section-title">Monitoramento da esteira</h1>
+      <p class="section-sub">Acompanhamento em tempo real da coleta</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1.6fr 1fr; gap: 20px">
+      <div class="panel monitor-main">
+        <div class="monitor-screen">
+          <span class="river-label">RIO ÁREA DE COLETA</span>
+          <div class="belt-scene">
+            <div class="belt-rail"></div>
+            <div class="belt-surface"></div>
+            <div class="belt-rollers"></div>
+            <span class="belt-item t1"><svg class="icon"><use href="#i-papel"/></svg></span>
+            <span class="belt-item t2"><svg class="icon"><use href="#i-plastico"/></svg></span>
+            <span class="belt-item t3"><svg class="icon"><use href="#i-vidro"/></svg></span>
+            <span class="belt-item t4"><svg class="icon"><use href="#i-caixa"/></svg></span>
+          </div>
+          <div class="floating-data"><span>COLETA</span><b id="coleta-taxa">— un/h</b></div>
+        </div>
+      </div>
+
+      <div class="panel sensor-card">
+        <span class="tag">STATUS</span>
+        <h3>Sensores</h3>
+        <div class="sensor"><i class="off"></i><span>Esteira</span><b id="sensor-esteira">Aguardando</b></div>
+        <div class="sensor"><i class="off"></i><span>Separação</span><b id="sensor-separacao">Aguardando</b></div>
+        <div class="sensor"><i class="off"></i><span>Coleta</span><b id="sensor-coleta">Aguardando</b></div>
+        <div class="sensor"><i class="off"></i><span>Manutenção</span><b id="sensor-manutencao">Sem dados</b></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><div><h3>Última atualização</h3><p>Dados vindos da esteira física</p></div>
+        <span id="monitor-update" class="unit">—</span>
+      </div>
+    </div>
+  </div>
+
+  <footer><span>TRASHBELT • 2026</span><span>Monitoramento de resíduos</span></footer>
+
+  <!-- Sprite SVG -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <defs>
+      <symbol id="i-papel" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+      <symbol id="i-plastico" viewBox="0 0 24 24"><path d="M10 2.5h4"/><path d="M10.5 2.5v3.2L8.5 9v11a1.8 1.8 0 0 0 1.8 1.8h3.4a1.8 1.8 0 0 0 1.8-1.8V9l-2-3.3V2.5"/><path d="M8.5 12.5h7"/></symbol>
+      <symbol id="i-vidro" viewBox="0 0 24 24"><path d="M7 3h10l-1.2 8.2a3.9 3.9 0 0 1-7.6 0z"/><path d="M12 15.2V21"/><path d="M8.5 21h7"/></symbol>
+      <symbol id="i-caixa" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></symbol>
+      <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/></symbol>
+      <symbol id="i-lua" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+    </defs>
+  </svg>
+
+  <script src="js/app.js?v=12"></script>
+</body>
+</html>
