@@ -210,7 +210,11 @@ Certifique-se de que estes arquivos estão no Git:
 2. Em **Settings → Environment Variables**, adicione:
    - `SUPABASE_URL` — `https://<seu-projeto>.supabase.co`
    - `SUPABASE_SECRET_KEY` — a chave secreta do Supabase (*Project Settings → API Keys*)
-3. Faça o deploy. A Vercel detecta o `vercel.json` e expõe `/api/dashboard`.
+   
+   > As variáveis são cadastradas **no painel da Vercel**, não no `vercel.json`.
+   > Se o deploy der `Environment Variable "SUPABASE_URL" references Secret "supabase_url", which does not exist`,
+   > é porque ficou uma referência `@supabase_url` no `vercel.json` — ela foi removida.
+3. Faça o deploy. A Vercel detecta `api/dashboard.js` automaticamente e expõe `/api/dashboard`.
 
 ### 3. Banco (Supabase)
 Execute `docs/tabelas.sql` no SQL Editor do Supabase para criar as tabelas e travas de segurança.
