@@ -19,7 +19,9 @@
     close: '<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>',
     external: '<path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
     recicla: '<path d="m7 19-3-5 2-3"/><path d="m17 19 3-5-2-3"/><path d="M12 3 9 8h6z"/><path d="M6 11h5l-2 4"/><path d="M13 11h5l-2 4"/>',
-    seta: '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>'
+    seta: '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+    sol: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/>',
+    lua: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
   };
 
   const page = (location.pathname.split("/").pop() || "index.html").replace(".html", "");
@@ -44,6 +46,8 @@
     svg.setAttribute("aria-hidden", "true");
     const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
     for (const [name, path] of Object.entries(ICONS)) {
+      // Algumas páginas já trazem o símbolo no HTML; não duplicar IDs.
+      if (document.getElementById("i-" + name)) continue;
       const symbol = document.createElementNS("http://www.w3.org/2000/svg", "symbol");
       symbol.setAttribute("id", "i-" + name);
       symbol.setAttribute("viewBox", "0 0 24 24");
@@ -234,16 +238,23 @@
         setTxt("hero-plastico", plastico);
         setTxt("hero-vidro", vidro);
 
-        // As 7 barras representam os 7 dias reais, não uma repetição dos materiais.
-        const diarios = Array.isArray(data.coletaPorDia)
-          ? data.coletaPorDia.map(p => Number(p.un || 0)) : [];
-        const serie = diarios.length ? diarios : [papel, plastico, vidro];
+        // Gráfico semanal real: rótulo de data, trilha visível e barra zero legível.
+        const dias = Array.isArray(data.coletaPorDia) && data.coletaPorDia.length
+          ? data.coletaPorDia
+          : ["Papel", "Plástico", "Vidro"].map((label, i) => ({ label, un: [papel, plastico, vidro][i] }));
+        const serie = dias.map(p => Number(p.un || 0));
         const max = Math.max(...serie, 1);
-        document.querySelectorAll("#hero-bars .mini-bar").forEach((b, i) => {
+        document.querySelectorAll("#hero-bars .mini-col").forEach((col, i) => {
+          const dado = dias[i % dias.length] || {};
           const v = Number(serie[i % serie.length]) || 0;
-          b.style.height = Math.max(3, (v / max) * 95) + "px";
-          b.classList.toggle("zero", v === 0);
-          b.title = String(v) + " un";
+          const bar = col.querySelector(".mini-bar");
+          const label = col.querySelector(".mini-label");
+          if (bar) {
+            bar.style.height = (v === 0 ? 6 : 10 + (v / max) * 76) + "px";
+            bar.classList.toggle("zero", v === 0);
+          }
+          if (label) label.textContent = dado.label || "—";
+          col.title = (dado.label || "—") + ": " + v + " un";
         });
 
         const meta = document.getElementById("hero-atualizacao");

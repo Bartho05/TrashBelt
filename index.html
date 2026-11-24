@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=24">
+  <link rel="stylesheet" href="css/style.css?v=26">
 
   <script>
     try {
@@ -48,10 +48,18 @@
           </div>
           <div class="preview-total" id="hero-total-card">—</div>
           <div class="preview-sub">Volume total registrado pela esteira</div>
-          <div class="mini-bars" id="hero-bars">
-            <div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div>
-            <div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div>
-            <div class="mini-bar"></div>
+          <div class="mini-chart-head">
+            <span>Últimos 7 dias</span>
+            <span>un / dia</span>
+          </div>
+          <div class="mini-chart" id="hero-bars">
+            <div class="mini-col"><div class="mini-track"><div class="mini-bar"></div></div><span class="mini-label">—</span></div>
+            <div class="mini-col"><div class="mini-track"><div class="mini-bar"></div></div><span class="mini-label">—</span></div>
+            <div class="mini-col"><div class="mini-track"><div class="mini-bar"></div></div><span class="mini-label">—</span></div>
+            <div class="mini-col"><div class="mini-track"><div class="mini-bar"></div></div><span class="mini-label">—</span></div>
+            <div class="mini-col"><div class="mini-track"><div class="mini-bar"></div></div><span class="mini-label">—</span></div>
+            <div class="mini-col"><div class="mini-track"><div class="mini-bar"></div></div><span class="mini-label">—</span></div>
+            <div class="mini-col"><div class="mini-track"><div class="mini-bar"></div></div><span class="mini-label">—</span></div>
           </div>
           <div class="preview-mats">
             <div class="preview-mat"><small>Papel</small><b id="hero-papel">—</b></div>
@@ -133,7 +141,7 @@
   </div>
 
   <div class="tooltip" id="tooltip" hidden></div>
-  <script src="js/shell.js?v=24"></script>
-  <script src="js/app.js?v=24"></script>
+  <script src="js/shell.js?v=26"></script>
+  <script src="js/app.js?v=26"></script>
 </body>
 </html>
