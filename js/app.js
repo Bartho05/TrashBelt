@@ -432,13 +432,18 @@ document.addEventListener("touchstart", (e) => {
   if (!alvo) esconderTooltip();
 }, { passive: true });
 
-/** Degraus: contagens diárias são discretas, então uma reta entre 0 e um pico
- *  criava uma rampa enganosa. Curvas suaves, além disso, ultrapassam o zero. */
-function caminhoDegraus(pts) {
+/** Curva suave (smoothstep): os pontos de controle ficam na mesma altura das
+ *  pontas, então arredonda a subida sem passar do zero nem virar degrau. */
+function caminhoSuave(pts) {
   if (!pts.length) return "";
   let d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
   for (let i = 1; i < pts.length; i++) {
-    d += " H" + pts[i][0].toFixed(1) + " V" + pts[i][1].toFixed(1);
+    const [x0, y0] = pts[i - 1];
+    const [x1, y1] = pts[i];
+    const meio = ((x0 + x1) / 2).toFixed(1);
+    d += " C" + meio + " " + y0.toFixed(1)
+       + " " + meio + " " + y1.toFixed(1)
+       + " " + x1.toFixed(1) + " " + y1.toFixed(1);
   }
   return d;
 }
@@ -474,7 +479,7 @@ function updateDailyChart(points) {
     const y = height - (v / topo) * (height - 25);
     return [x, y];
   });
-  const linha = caminhoDegraus(coordsGrafico);
+  const linha = caminhoSuave(coordsGrafico);
   const paths = svg.querySelectorAll("path");
   if (paths[0]) paths[0].setAttribute("d", linha + " L" + width + " " + height + " L0 " + height + "Z");
   if (paths[1]) paths[1].setAttribute("d", linha);
