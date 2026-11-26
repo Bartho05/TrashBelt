@@ -220,6 +220,10 @@ Certifique-se de que estes arquivos estão no Git:
 ### 3. Banco (Supabase)
 Execute `docs/tabelas.sql` no SQL Editor do Supabase para criar as tabelas e travas de segurança.
 
+> Se você mexeu no banco depois disso e o painel passou a dar `42501`/`PGRST205`, rode
+> `docs/reparar-banco.sql` no SQL Editor: ele devolve o acesso ao `service_role` e recria
+> a tabela de histórico sem apagar coletas existentes.
+
 ### 4. Diferença local vs produção
 | | Local (XAMPP) | Produção (Vercel) |
 |---|---|---|
