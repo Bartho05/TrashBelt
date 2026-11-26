@@ -108,9 +108,9 @@ function esconderTooltip() {
 function tooltipDetalhe(point, legenda) {
   const total = Number(point?.un || 0);
   const partes = [
-    ["#3b82f6", "Papel", Number(point?.papel || 0)],
-    ["#10b981", "Plástico", Number(point?.plastico || 0)],
-    ["#f59e0b", "Vidro", Number(point?.vidro || 0)],
+    ["var(--papel)", "Papel", Number(point?.papel || 0)],
+    ["var(--plastico)", "Plástico", Number(point?.plastico || 0)],
+    ["var(--vidro)", "Vidro", Number(point?.vidro || 0)],
   ].filter(([, , v]) => v > 0)
    .map(([cor, nome, v]) => `<span class="tt-dot" style="background:${cor}"></span>${nome} ${v.toLocaleString("pt-BR")}`);
   const detalhe = partes.length ? `<small>${partes.join(" &nbsp;·&nbsp; ")}</small>` : "";

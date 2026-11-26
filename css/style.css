@@ -10,10 +10,10 @@
     --primary-deep: #2563eb;
     --primary-soft: rgba(79, 140, 255, 0.14);
 
-    /* Materiais */
+    /* Materiais: azul = papel, amarelo = plástico, verde = vidro */
     --papel: #60a5fa;
-    --plastico: #34d399;
-    --vidro: #fbbf24;
+    --plastico: #fbbf24;
+    --vidro: #34d399;
 
     /* Neutros — tema escuro */
     --bg: #0a1020;
@@ -65,8 +65,8 @@ html[data-theme="light"] {
     --primary-hover: #1d4ed8;
     --primary-soft: rgba(37, 99, 235, 0.10);
     --papel: #3b82f6;
-    --plastico: #10b981;
-    --vidro: #f59e0b;
+    --plastico: #f59e0b;
+    --vidro: #10b981;
     --success: #059669;
     --warning: #d97706;
     --danger: #e11d48;
@@ -508,8 +508,8 @@ html[data-theme="light"] .i-lua { display: block }
 }
 
 .material-icon.paper { background: rgba(96, 165, 250, 0.16); color: var(--papel) }
-.material-icon.plastic { background: rgba(52, 211, 153, 0.14); color: var(--plastico) }
-.material-icon.glass { background: rgba(251, 191, 36, 0.14); color: var(--vidro) }
+.material-icon.plastic { background: rgba(251, 191, 36, 0.14); color: var(--plastico) }
+.material-icon.glass { background: rgba(52, 211, 153, 0.14); color: var(--vidro) }
 
 /* =====================================================================
    PAINÉIS
@@ -874,8 +874,8 @@ html[data-theme="light"] .i-lua { display: block }
 }
 
 .bar-segment.papel { background: linear-gradient(180deg, #93c5fd, var(--papel)) }
-.bar-segment.plastico { background: linear-gradient(180deg, #6ee7b7, var(--plastico)) }
-.bar-segment.vidro { background: linear-gradient(180deg, #fde68a, var(--vidro)) }
+.bar-segment.plastico { background: linear-gradient(180deg, #fde68a, var(--plastico)) }
+.bar-segment.vidro { background: linear-gradient(180deg, #6ee7b7, var(--vidro)) }
 
 .bar-segment.bar-zero {
     background: var(--border-light);
@@ -953,8 +953,8 @@ html[data-theme="light"] .i-lua { display: block }
 }
 
 .compare-fill.papel { background: linear-gradient(90deg, #93c5fd, var(--papel)) }
-.compare-fill.plastico { background: linear-gradient(90deg, #6ee7b7, var(--plastico)) }
-.compare-fill.vidro { background: linear-gradient(90deg, #fde68a, var(--vidro)) }
+.compare-fill.plastico { background: linear-gradient(90deg, #fde68a, var(--plastico)) }
+.compare-fill.vidro { background: linear-gradient(90deg, #6ee7b7, var(--vidro)) }
 
 .compare-value {
     font-family: var(--font-mono);
