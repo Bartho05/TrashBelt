@@ -3,25 +3,35 @@
    =====================================================================
    Um sensor de cores TCS34725 classifica o objeto na esteira
    (papel / plástico / vidro), o servo do destino correspondente abre e
-   um sensor de obstáculos confirma a chegada do objeto antes de
-   contabilizar. Os contadores ficam salvos na memória permanente (NVS,
-   via Preferences) e sobrevivem a reinícios.
+   um sensor de obstáculos confirma a chegada antes de contabilizar.
+
+   Os contadores ficam na memória permanente (Preferences/NVS) e são
+   enviados ao endpoint /api/ingest do painel (Vercel ou XAMPP).
+   O firmware NÃO contém a chave secreta do Supabase: ele autentica com
+   um token de dispositivo lido de secrets.h (fora do Git).
 
    Monitor Serial em 115200 baud. Comandos: STATUS, ZERAR, AJUDA.
 
    Bibliotecas (Library Manager do Arduino IDE):
-     • Adafruit TCS34725   — instale aceitando as dependências sugeridas
+     • Adafruit TCS34725   — aceite as dependências sugeridas
      • ESP32Servo
-   "Wire" e "Preferences" já vêm com o núcleo ESP32.
-   Placa: ESP32 Dev Module (instale "esp32 by Espressif" no Boards Manager).
+   "Wire", "Preferences", "WiFi", "WiFiClientSecure" e "HTTPClient"
+   já vêm com o núcleo ESP32.
+   Placa: ESP32 Dev Module (esp32 by Espressif no Boards Manager).
+
+   ANTES DE COMPILAR: copie secrets.example.h para secrets.h e preencha.
    ===================================================================== */
 
 #include <Wire.h>
 #include <Adafruit_TCS34725.h>
 #include <ESP32Servo.h>
 #include <Preferences.h>
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+#include <HTTPClient.h>
 #include <ctype.h>
 #include <string.h>
+#include "secrets.h"
 
 // ==================================================
 // PINOS
@@ -51,8 +61,15 @@ const int pinosObstaculos[3] = {
 const unsigned long TEMPO_LIMITE = 10000;
 const unsigned long DEBOUNCE_MS = 60;
 
+// SERVO: 25 MS POR GRAU
+const unsigned long INTERVALO_FECHAMENTO = 25;
+
 const int ANGULO_FECHADO = 0;
 const int ANGULO_ABERTO = 90;
+
+// WIFI E ENVIO
+const unsigned long INTERVALO_WIFI = 10000;
+const unsigned long INTERVALO_REENVIO = 15000;
 
 // Destinos
 enum {
@@ -93,15 +110,29 @@ int destinoPendente = NENHUM;
 bool aguardandoSaidaSensorCor = false;
 bool sensorDestinoArmado = false;
 
+// FECHAMENTO GRADUAL
+bool servoFechando = false;
+int destinoFechando = NENHUM;
+int anguloAtualFechamento = ANGULO_ABERTO;
+unsigned long ultimaEtapaFechamento = 0;
+
+// TEMPOS DOS SENSORES
 unsigned long inicioDestino = 0;
 unsigned long inicioDeteccao = 0;
+
+// WIFI
+unsigned long ultimaTentativaWiFi = 0;
+
+// ENVIO AO SERVIDOR
+bool sincronizacaoPendente = false;
+unsigned long ultimaTentativaEnvio = 0;
 
 // Buffer do Monitor Serial
 char comando[32];
 byte indiceComando = 0;
 
 // ==================================================
-// ARMAZENAMENTO
+// ARMAZENAMENTO LOCAL
 // ==================================================
 
 void salvarContadores() {
@@ -137,6 +168,12 @@ void carregarContadores() {
   Serial.println("\nContadores recuperados:");
   Serial.print("Total: ");
   Serial.println(totalObjetos);
+  Serial.print("Papel: ");
+  Serial.println(totalPapel);
+  Serial.print("Plastico: ");
+  Serial.println(totalPlastico);
+  Serial.print("Vidro: ");
+  Serial.println(totalVidro);
 }
 
 // ==================================================
@@ -160,6 +197,121 @@ void imprimirStatus() {
   Serial.println(totalVidro);
 
   Serial.println("================================");
+}
+
+// ==================================================
+// WIFI
+// ==================================================
+
+void iniciarWiFi() {
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(TB_WIFI_SSID, TB_WIFI_PASSWORD);
+  ultimaTentativaWiFi = millis();
+
+  Serial.println("\nConectando ao Wi-Fi...");
+}
+
+void verificarWiFi() {
+
+  if (WiFi.status() == WL_CONNECTED) {
+    return;
+  }
+
+  if (millis() - ultimaTentativaWiFi >= INTERVALO_WIFI) {
+    ultimaTentativaWiFi = millis();
+    Serial.println("Tentando reconectar ao Wi-Fi...");
+    WiFi.disconnect();
+    WiFi.begin(TB_WIFI_SSID, TB_WIFI_PASSWORD);
+  }
+}
+
+// ==================================================
+// ENVIO AO SERVIDOR (/api/ingest)
+// ==================================================
+
+void sincronizarServidor() {
+
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Sem Wi-Fi. Envio aguardando.");
+    return;
+  }
+
+  Serial.println("\nEnviando contadores ao servidor...");
+
+  WiFiClientSecure clienteSeguro;
+
+  // Conexao HTTPS sem validacao do certificado (ESP32).
+  // Para producao, configure a CA do servidor.
+  clienteSeguro.setInsecure();
+
+  HTTPClient http;
+  http.setTimeout(4000);
+
+  if (!http.begin(clienteSeguro, TB_INGEST_URL)) {
+    Serial.println("ERRO ao iniciar conexao HTTPS.");
+    return;
+  }
+
+  http.addHeader("Content-Type", "application/json");
+
+  // Autenticacao do dispositivo — a chave secreta fica no servidor.
+  http.addHeader("x-device-token", TB_DEVICE_TOKEN);
+
+  // JSON com os contadores ACUMULADOS. O backend calcula o delta.
+  String json = "{";
+  json += "\"total\":" + String(totalObjetos) + ",";
+  json += "\"papel\":" + String(totalPapel) + ",";
+  json += "\"plastico\":" + String(totalPlastico) + ",";
+  json += "\"vidro\":" + String(totalVidro);
+  json += "}";
+
+  Serial.println("JSON enviado:");
+  Serial.println(json);
+
+  int codigoHTTP = http.POST(json);
+
+  if (codigoHTTP > 0) {
+
+    Serial.print("Resposta HTTP: ");
+    Serial.println(codigoHTTP);
+
+    String resposta = http.getString();
+    Serial.println("Resposta do servidor:");
+    Serial.println(resposta);
+
+    if (codigoHTTP >= 200 && codigoHTTP < 300) {
+      Serial.println("Sincronizacao concluida!");
+      sincronizacaoPendente = false;
+    } else {
+      Serial.println("Falha na sincronizacao.");
+    }
+
+  } else {
+    Serial.print("Erro HTTP: ");
+    Serial.println(http.errorToString(codigoHTTP));
+  }
+
+  http.end();
+}
+
+void verificarSincronizacao() {
+
+  if (!sincronizacaoPendente) {
+    return;
+  }
+
+  // Nao sincronizar enquanto o servo estiver fechando
+  if (servoFechando) {
+    return;
+  }
+
+  if (millis() - ultimaTentativaEnvio < INTERVALO_REENVIO) {
+    return;
+  }
+
+  ultimaTentativaEnvio = millis();
+  sincronizarServidor();
 }
 
 // ==================================================
@@ -190,6 +342,8 @@ void registrarObjeto(int destino) {
 
   salvarContadores();
   imprimirStatus();
+
+  sincronizacaoPendente = true;
 }
 
 // ==================================================
@@ -203,70 +357,54 @@ int identificarMaterial(
   uint16_t c
 ) {
 
-  if (c < MIN_CLEAR) {
+  if (c < MIN_CLEAR || r == 0 || g == 0 || b == 0) {
+    Serial.println("Leitura invalida ou pouca luz.");
     return NENHUM;
   }
 
-  if (r == 0 || g == 0 || b == 0) {
-    return NENHUM;
-  }
-
-  float proporcaoBR = (float)b / r;
-  float proporcaoGR = (float)g / r;
-  float proporcaoGB = (float)g / b;
+  float proporcaoBR = (float) b / r;
+  float proporcaoGR = (float) g / r;
+  float proporcaoGB = (float) g / b;
 
   Serial.println("\n--- Leitura do objeto ---");
-
   Serial.print("R: ");
   Serial.print(r);
-
   Serial.print(" | G: ");
   Serial.print(g);
-
   Serial.print(" | B: ");
   Serial.print(b);
-
   Serial.print(" | Clear: ");
   Serial.println(c);
 
   Serial.print("G/R: ");
-  Serial.println(proporcaoGR);
-
+  Serial.println(proporcaoGR, 2);
   Serial.print("G/B: ");
-  Serial.println(proporcaoGB);
-
+  Serial.println(proporcaoGB, 2);
   Serial.print("B/R: ");
-  Serial.println(proporcaoBR);
+  Serial.println(proporcaoBR, 2);
 
-  // VERDE / VIDRO
-  // Prioriza o verde-escuro identificado nos testes.
-  if (proporcaoGR >= 1.50 &&
-      proporcaoGB >= 1.20) {
-
+  // VERDE -> VIDRO
+  if (proporcaoGR >= 1.00 && proporcaoBR < 0.85) {
+    Serial.println("Cor identificada: VERDE");
+    Serial.println("Material identificado: VIDRO");
     return VIDRO;
   }
 
-  // Outra faixa de identificacao do verde
-  if (proporcaoBR <= 0.55 &&
-      proporcaoGR >= 0.80) {
-
-    return VIDRO;
-  }
-
-  // AZUL / PLASTICO
-  if (proporcaoBR >= 0.78 &&
-      proporcaoGR < 1.50) {
-
-    return PLASTICO;
-  }
-
-  // BRANCO / PAPEL
-  if (proporcaoBR >= 0.56 &&
-      proporcaoBR <= 0.75) {
-
+  // AZUL -> PAPEL
+  if (proporcaoBR >= 1.10) {
+    Serial.println("Cor identificada: AZUL");
+    Serial.println("Material identificado: PAPEL");
     return PAPEL;
   }
 
+  // AMARELO -> PLASTICO
+  if (proporcaoGR < 0.90 && proporcaoBR < 0.60) {
+    Serial.println("Cor identificada: AMARELO");
+    Serial.println("Material identificado: PLASTICO");
+    return PLASTICO;
+  }
+
+  Serial.println("Cor nao reconhecida.");
   return NENHUM;
 }
 
@@ -301,6 +439,52 @@ void abrirDestino(int destino) {
 }
 
 // ==================================================
+// FECHAMENTO GRADUAL DO SERVO
+// ==================================================
+
+void iniciarFechamentoSuave(int destino) {
+
+  if (destino < PAPEL || destino > VIDRO) {
+    return;
+  }
+
+  servoFechando = true;
+  destinoFechando = destino;
+  anguloAtualFechamento = ANGULO_ABERTO;
+  ultimaEtapaFechamento = millis();
+
+  Serial.println("Iniciando fechamento gradual do servo...");
+}
+
+void atualizarFechamentoServo() {
+
+  if (!servoFechando) {
+    return;
+  }
+
+  unsigned long agora = millis();
+
+  if (agora - ultimaEtapaFechamento >= INTERVALO_FECHAMENTO) {
+
+    ultimaEtapaFechamento = agora;
+    anguloAtualFechamento--;
+
+    if (anguloAtualFechamento <= ANGULO_FECHADO) {
+
+      anguloAtualFechamento = ANGULO_FECHADO;
+      servos[destinoFechando].write(ANGULO_FECHADO);
+      servoFechando = false;
+      destinoFechando = NENHUM;
+
+      Serial.println("Servo completamente fechado.");
+
+    } else {
+      servos[destinoFechando].write(anguloAtualFechamento);
+    }
+  }
+}
+
+// ==================================================
 // FINALIZAR DESTINO
 // ==================================================
 
@@ -312,7 +496,8 @@ void finalizarDestino(bool timeout) {
 
   int destino = destinoPendente;
 
-  servos[destino].write(ANGULO_FECHADO);
+  // Inicia o fechamento gradual (nao fecha de uma vez)
+  iniciarFechamentoSuave(destino);
 
   if (timeout) {
 
@@ -366,7 +551,6 @@ void verificarDestino() {
       }
 
     } else {
-
       inicioDeteccao = 0;
     }
   }
@@ -407,8 +591,10 @@ void processarComando(char *texto) {
 
     salvarContadores();
 
-    Serial.println("Todos os contadores foram zerados.");
+    // Atualiza tambem o banco de dados
+    sincronizacaoPendente = true;
 
+    Serial.println("Todos os contadores foram zerados.");
     imprimirStatus();
 
   } else if (strcmp(texto, "AJUDA") == 0) {
@@ -471,6 +657,9 @@ void setup() {
 
   carregarContadores();
 
+  // Wi-Fi
+  iniciarWiFi();
+
   // Sensor de cores
   Wire.begin(SDA_TCS, SCL_TCS);
 
@@ -521,6 +710,14 @@ void loop() {
 
   verificarSerial();
 
+  verificarWiFi();
+
+  // Atualiza o fechamento gradual dos servos
+  atualizarFechamentoServo();
+
+  // Envia contadores ao painel quando houver novidade
+  verificarSincronizacao();
+
   uint16_t r, g, b, c;
 
   tcs.getRawData(&r, &g, &b, &c);
@@ -536,7 +733,8 @@ void loop() {
   // nao existe outro destino pendente.
   if (c >= MIN_CLEAR &&
       !aguardandoSaidaSensorCor &&
-      destinoPendente == NENHUM) {
+      destinoPendente == NENHUM &&
+      !servoFechando) {
 
     aguardandoSaidaSensorCor = true;
 

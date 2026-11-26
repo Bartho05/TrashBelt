@@ -21,5 +21,8 @@ desktop.ini
 # Artefatos de compilacao do Arduino
 arduino/**/build/
 
+# Credenciais do firmware (WiFi/token/URL) — nunca versionar
+arduino/**/secrets.h
+
 # Vercel
 .vercel/

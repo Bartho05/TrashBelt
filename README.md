@@ -211,6 +211,7 @@ Certifique-se de que estes arquivos estão no Git:
 2. Em **Settings → Environment Variables**, adicione:
    - `SUPABASE_URL` — `https://<seu-projeto>.supabase.co`
    - `SUPABASE_SECRET_KEY` — a chave secreta do Supabase (*Project Settings → API Keys*)
+   - `TB_DEVICE_TOKEN` — o mesmo token usado pelo ESP32 no header `x-device-token`
    
    > As variáveis são cadastradas **no painel da Vercel**, não no `vercel.json`.
    > Se o deploy der `Environment Variable "SUPABASE_URL" references Secret "supabase_url", which does not exist`,
@@ -238,7 +239,18 @@ O `js/app.js` detecta automaticamente se está em `localhost` e usa a URL corret
 ### Firmware (ESP32)
 
 1. No Arduino IDE, instale a placa `esp32 by Espressif Systems` (Boards Manager) e as bibliotecas `Adafruit TCS34725` e `ESP32Servo` (Library Manager)
-2. Abra `arduino/trashbelt/trashbelt.ino`, selecione **ESP32 Dev Module** e faça o upload
-3. Monitor Serial em **115200 baud** — comandos: `STATUS`, `ZERAR`, `AJUDA`
+2. Copie `arduino/trashbelt/secrets.example.h` para `arduino/trashbelt/secrets.h` e preencha:
+   - Wi-Fi (`TB_WIFI_SSID` / `TB_WIFI_PASSWORD`)
+   - `TB_INGEST_URL` — `https://<seu-projeto>.vercel.app/api/ingest` (ou `http://IP_DA_MAQUINA/Trashbelt/api/ingest.php` no XAMPP da rede local)
+   - `TB_DEVICE_TOKEN` — o mesmo valor de `TB_DEVICE_TOKEN` do servidor
+   
+   > `secrets.h` está no `.gitignore`: nunca commite Wi-Fi, token ou URL reais.
+3. Abra `arduino/trashbelt/trashbelt.ino`, selecione **ESP32 Dev Module** e faça o upload
+4. Monitor Serial em **115200 baud** — comandos: `STATUS`, `ZERAR`, `AJUDA`
+
+O ESP32 envia os contadores **acumulados** via `POST /api/ingest` com header
+`x-device-token`. O backend calcula o delta e grava o estado em
+`trash_belt_status` e o incremento em `trash_belt_historico`. A chave secreta do
+Supabase fica apenas no servidor — nunca no firmware.
 
 **Ligação:** TCS34725 em SDA=23 / SCL=22 · servos nos pinos 18 (papel), 19 (plástico), 21 (vidro) · sensores de obstáculo nos pinos 27, 26 e 25.
