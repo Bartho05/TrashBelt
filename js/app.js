@@ -247,6 +247,8 @@ function atualizarDashboard(data) {
     updateDailyChart(data.coletaPorDia);
     updateBarras("dia", data.coletaPorDia);
   }
+  if (Array.isArray(data.coletaPorSemana)) updateBarras("semana", data.coletaPorSemana);
+  if (Array.isArray(data.coletaPorMes)) updateBarras("mes", data.coletaPorMes);
 }
 
 function atualizarCharts(data) {
@@ -298,6 +300,7 @@ let sortState = { key: null, dir: 1 };
 
 function filtrarHistorico(filtro) {
   filtroHistorico = filtro;
+  atualizarVisualFiltro(filtro);
   renderHistorico();
 }
 
@@ -583,6 +586,41 @@ function diaSemana(label) {
   return dias[d.getDay()] + ", " + m[1] + "/" + m[2];
 }
 
+/* ---------- Controles expansíveis (um botão, menu dentro) ---------- */
+function fecharExpand(id) {
+  const controle = document.getElementById(id);
+  if (!controle) return;
+  controle.classList.remove("aberto");
+  const trigger = controle.querySelector(".expand-trigger");
+  if (trigger) trigger.setAttribute("aria-expanded", "false");
+}
+
+function alternarExpand(id) {
+  const controle = document.getElementById(id);
+  if (!controle) return;
+  const vaiAbrir = !controle.classList.contains("aberto");
+  document.querySelectorAll(".expand-select.aberto").forEach(el => {
+    if (el !== controle) fecharExpand(el.id);
+  });
+  controle.classList.toggle("aberto", vaiAbrir);
+  const trigger = controle.querySelector(".expand-trigger");
+  if (trigger) trigger.setAttribute("aria-expanded", String(vaiAbrir));
+}
+
+document.addEventListener("click", (event) => {
+  if (event.target.closest(".expand-select")) return;
+  document.querySelectorAll(".expand-select.aberto").forEach(el => fecharExpand(el.id));
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  document.querySelectorAll(".expand-select.aberto").forEach(el => {
+    fecharExpand(el.id);
+    const trigger = el.querySelector(".expand-trigger");
+    if (trigger) trigger.focus();
+  });
+});
+
 /* ---------- Barras empilhadas ---------- */
 const periodState = { dia: [], semana: [], mes: [] };
 let periodoAtivo = "dia";
@@ -593,14 +631,35 @@ const MESES_FULL = {
   nov: "novembro", dez: "dezembro"
 };
 
-function setPeriod(period) {
-  periodoAtivo = period;
+const PERIODOS_LABEL = { dia: "Dia", semana: "Semana", mes: "Mês" };
+
+function atualizarVisualPeriodo(period) {
+  const controle = document.getElementById("periodo-control");
+  if (!controle) return;
+  const valor = document.getElementById("periodo-valor");
+  if (valor) valor.textContent = PERIODOS_LABEL[period] || "Dia";
+  controle.querySelectorAll('.expand-menu [role="option"]').forEach(op => {
+    const ativo = op.dataset.value === period;
+    op.classList.toggle("selecionado", ativo);
+    op.setAttribute("aria-selected", String(ativo));
+  });
+  // Compatibilidade com a versão anterior de botões, se ainda existir em alguma página.
   document.querySelectorAll(".period-tab").forEach(b => {
     const ativo = b.dataset.period === period;
     b.classList.toggle("active", ativo);
     b.setAttribute("aria-pressed", String(ativo));
   });
+}
+
+function setPeriod(period) {
+  periodoAtivo = period;
+  atualizarVisualPeriodo(period);
+  fecharExpand("periodo-control");
   renderBarras(period);
+}
+
+function selecionarPeriodo(period) {
+  setPeriod(period);
 }
 
 function updateBarras(period, points) {
@@ -671,10 +730,34 @@ function mostrarTooltipBarras(el, idx, period) {
 }
 
 /* ---------- Filtro material ---------- */
-function atualizarVisualFiltro() {
-  const sel = document.getElementById("filtro-material");
-  const field = document.getElementById("filtro-material-field");
-  if (sel && field) field.dataset.material = sel.value;
+const MATERIAIS_LABEL = {
+  todos: "Todos os materiais",
+  papel: "Papel",
+  plastico: "Plástico",
+  vidro: "Vidro",
+};
+
+function atualizarVisualFiltro(valor = filtroHistorico) {
+  const controle = document.getElementById("filtro-material-control");
+  if (!controle) return;
+  controle.dataset.material = valor;
+  const texto = document.getElementById("filtro-material-valor");
+  if (texto) texto.textContent = MATERIAIS_LABEL[valor] || MATERIAIS_LABEL.todos;
+  controle.querySelectorAll('.expand-menu [role="option"]').forEach(op => {
+    const ativo = op.dataset.value === valor;
+    op.classList.toggle("selecionado", ativo);
+    op.setAttribute("aria-selected", String(ativo));
+  });
+}
+
+function selecionarMaterial(valor) {
+  filtrarHistorico(valor);
+  try {
+    const url = new URL(location.href);
+    url.searchParams.set("filtro", valor);
+    history.replaceState(null, "", url);
+  } catch (_) { /* URL pode ser bloqueada em alguns contextos */ }
+  fecharExpand("filtro-material-control");
 }
 
 function filtrarMaterial(mat) {
@@ -683,12 +766,12 @@ function filtrarMaterial(mat) {
 
 /* ---------- Inicialização ---------- */
 const urlParams = new URLSearchParams(location.search);
-if (urlParams.get("filtro")) {
-  filtroHistorico = urlParams.get("filtro");
-  const sel = document.getElementById("filtro-material");
-  if (sel) sel.value = filtroHistorico;
+const filtroParam = urlParams.get("filtro");
+if (["todos", "papel", "plastico", "vidro"].includes(filtroParam)) {
+  filtroHistorico = filtroParam;
 }
 atualizarVisualFiltro();
+atualizarVisualPeriodo(periodoAtivo);
 
 function iniciar() {
   // A landing busca o resumo uma única vez no shell.js; o polling é só do painel.

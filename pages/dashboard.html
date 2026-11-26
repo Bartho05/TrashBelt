@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=31">
+  <link rel="stylesheet" href="../css/style.css?v=32">
 
   <script>
     try {
@@ -139,10 +139,22 @@
     </section>
 
     <section class="panel bars-section">
-      <div class="bars-period-tabs">
-        <button class="period-tab active" data-period="dia" onclick="setPeriod('dia')">Dia</button>
-        <button class="period-tab" data-period="semana" onclick="setPeriod('semana')">Semana</button>
-        <button class="period-tab" data-period="mes" onclick="setPeriod('mes')">Mês</button>
+      <div class="expand-select" id="periodo-control">
+        <button type="button" class="expand-trigger" aria-haspopup="listbox" aria-expanded="false" onclick="alternarExpand('periodo-control')">
+          <span class="expand-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-6M12 20V6M18 20v-9"/></svg>
+          </span>
+          <span class="expand-copy">
+            <span class="expand-label">Período</span>
+            <span class="expand-value" id="periodo-valor">Dia</span>
+          </span>
+          <svg class="expand-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="expand-menu" role="listbox" id="periodo-menu">
+          <button type="button" role="option" data-value="dia" aria-selected="true" class="selecionado" onclick="selecionarPeriodo('dia')">Dia</button>
+          <button type="button" role="option" data-value="semana" aria-selected="false" onclick="selecionarPeriodo('semana')">Semana</button>
+          <button type="button" role="option" data-value="mes" aria-selected="false" onclick="selecionarPeriodo('mes')">Mês</button>
+        </div>
       </div>
       <div class="bars-title">
         <h3 id="period-title">Quantidade de resíduos coletados</h3>
@@ -212,7 +224,7 @@
     </defs>
   </svg>
 
-  <script src="../js/shell.js?v=31"></script>
-  <script src="../js/app.js?v=31"></script>
+  <script src="../js/shell.js?v=32"></script>
+  <script src="../js/app.js?v=32"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=31">
+  <link rel="stylesheet" href="../css/style.css?v=32">
 
   <script>
     try {
@@ -27,21 +27,24 @@
     </div>
 
     <div class="history-controls">
-      <label class="filter-field" id="filtro-material-field" data-material="todos">
-        <span class="filter-field-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5z"/></svg>
-        </span>
-        <span class="filter-field-text">
-          <span class="filter-field-label">Filtrar por material</span>
-          <select class="filter-select" id="filtro-material" onchange="atualizarVisualFiltro(); filtrarHistorico(this.value)">
-            <option value="todos">Todos os materiais</option>
-            <option value="papel">Papel</option>
-            <option value="plastico">Plástico</option>
-            <option value="vidro">Vidro</option>
-          </select>
-        </span>
-        <svg class="filter-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-      </label>
+      <div class="expand-select" id="filtro-material-control" data-material="todos">
+        <button type="button" class="expand-trigger" aria-haspopup="listbox" aria-expanded="false" onclick="alternarExpand('filtro-material-control')">
+          <span class="expand-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5z"/></svg>
+          </span>
+          <span class="expand-copy">
+            <span class="expand-label">Filtrar por material</span>
+            <span class="expand-value" id="filtro-material-valor">Todos os materiais</span>
+          </span>
+          <svg class="expand-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="expand-menu material-menu" role="listbox" id="filtro-material-menu">
+          <button type="button" role="option" data-value="todos" aria-selected="true" class="selecionado" onclick="selecionarMaterial('todos')"><span class="menu-dot"></span>Todos os materiais</button>
+          <button type="button" role="option" data-value="papel" aria-selected="false" onclick="selecionarMaterial('papel')"><span class="menu-dot"></span>Papel</button>
+          <button type="button" role="option" data-value="plastico" aria-selected="false" onclick="selecionarMaterial('plastico')"><span class="menu-dot"></span>Plástico</button>
+          <button type="button" role="option" data-value="vidro" aria-selected="false" onclick="selecionarMaterial('vidro')"><span class="menu-dot"></span>Vidro</button>
+        </div>
+      </div>
       <span class="history-count" id="historico-contador">Carregando…</span>
     </div>
 
@@ -82,7 +85,7 @@
     </defs>
   </svg>
 
-  <script src="../js/shell.js?v=31"></script>
-  <script src="../js/app.js?v=31"></script>
+  <script src="../js/shell.js?v=32"></script>
+  <script src="../js/app.js?v=32"></script>
 </body>
 </html>
