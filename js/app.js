@@ -595,9 +595,11 @@ const MESES_FULL = {
 
 function setPeriod(period) {
   periodoAtivo = period;
-  document.querySelectorAll(".period-tab").forEach(b => b.classList.remove("active"));
-  const btn = document.querySelector('.period-tab[data-period="' + period + '"]');
-  if (btn) btn.classList.add("active");
+  document.querySelectorAll(".period-tab").forEach(b => {
+    const ativo = b.dataset.period === period;
+    b.classList.toggle("active", ativo);
+    b.setAttribute("aria-pressed", String(ativo));
+  });
   renderBarras(period);
 }
 
@@ -669,6 +671,12 @@ function mostrarTooltipBarras(el, idx, period) {
 }
 
 /* ---------- Filtro material ---------- */
+function atualizarVisualFiltro() {
+  const sel = document.getElementById("filtro-material");
+  const field = document.getElementById("filtro-material-field");
+  if (sel && field) field.dataset.material = sel.value;
+}
+
 function filtrarMaterial(mat) {
   location.href = "history.html?filtro=" + mat;
 }
@@ -680,6 +688,7 @@ if (urlParams.get("filtro")) {
   const sel = document.getElementById("filtro-material");
   if (sel) sel.value = filtroHistorico;
 }
+atualizarVisualFiltro();
 
 function iniciar() {
   // A landing busca o resumo uma única vez no shell.js; o polling é só do painel.

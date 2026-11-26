@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=30">
+  <link rel="stylesheet" href="../css/style.css?v=31">
 
   <script>
     try {
@@ -27,12 +27,21 @@
     </div>
 
     <div class="history-controls">
-      <select class="filter-select" id="filtro-material" onchange="filtrarHistorico(this.value)">
-        <option value="todos">Material: Todos</option>
-        <option value="papel">Material: Papel</option>
-        <option value="plastico">Material: Plástico</option>
-        <option value="vidro">Material: Vidro</option>
-      </select>
+      <label class="filter-field" id="filtro-material-field" data-material="todos">
+        <span class="filter-field-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5z"/></svg>
+        </span>
+        <span class="filter-field-text">
+          <span class="filter-field-label">Filtrar por material</span>
+          <select class="filter-select" id="filtro-material" onchange="atualizarVisualFiltro(); filtrarHistorico(this.value)">
+            <option value="todos">Todos os materiais</option>
+            <option value="papel">Papel</option>
+            <option value="plastico">Plástico</option>
+            <option value="vidro">Vidro</option>
+          </select>
+        </span>
+        <svg class="filter-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </label>
       <span class="history-count" id="historico-contador">Carregando…</span>
     </div>
 
@@ -73,7 +82,7 @@
     </defs>
   </svg>
 
-  <script src="../js/shell.js?v=30"></script>
-  <script src="../js/app.js?v=30"></script>
+  <script src="../js/shell.js?v=31"></script>
+  <script src="../js/app.js?v=31"></script>
 </body>
 </html>

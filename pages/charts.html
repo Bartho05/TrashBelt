@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=30">
+  <link rel="stylesheet" href="../css/style.css?v=31">
 
   <script>
     try {
@@ -33,10 +33,13 @@
             <h2>Quantidade de resíduos coletados</h2>
             <p id="period-descricao">Por dia</p>
           </div>
-          <div class="bars-period-tabs">
-            <button class="period-tab active" data-period="dia" onclick="setPeriod('dia')">Dia</button>
-            <button class="period-tab" data-period="semana" onclick="setPeriod('semana')">Semana</button>
-            <button class="period-tab" data-period="mes" onclick="setPeriod('mes')">Mês</button>
+          <div class="period-switch" role="group" aria-label="Período dos gráficos">
+            <span class="period-switch-label">Período</span>
+            <div class="bars-period-tabs">
+              <button type="button" class="period-tab active" data-period="dia" aria-pressed="true" onclick="setPeriod('dia')">Dia</button>
+              <button type="button" class="period-tab" data-period="semana" aria-pressed="false" onclick="setPeriod('semana')">Semana</button>
+              <button type="button" class="period-tab" data-period="mes" aria-pressed="false" onclick="setPeriod('mes')">Mês</button>
+            </div>
           </div>
         </div>
         <div class="bars-title">
@@ -133,7 +136,7 @@
     </defs>
   </svg>
 
-  <script src="../js/shell.js?v=30"></script>
-  <script src="../js/app.js?v=30"></script>
+  <script src="../js/shell.js?v=31"></script>
+  <script src="../js/app.js?v=31"></script>
 </body>
 </html>

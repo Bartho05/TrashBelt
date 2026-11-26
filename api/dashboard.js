@@ -50,24 +50,6 @@ async function supabaseGet(table, params = {}) {
 }
 
 /* ---------- Data / fuso ---------- */
-function agoraUtc() { return new Date(); }
-
-/* Formata uma data ISO para o fuso do painel (America/Sao_Paulo) */
-function paraFusoPainel(isoString) {
-  return new Date(isoString); // Date já armazena em UTC internamente
-}
-
-/* Chave de agrupamento no fuso do painel */
-function chaveAgrupamento(date, formato) {
-  return new Intl.DateTimeFormat('pt-BR', {
-    timeZone: TB_TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    ...formato,
-  }).formatToParts ? null : null;
-}
-
 /* Helper: formata partes de data no fuso São Paulo */
 function partesFuso(date, parts) {
   return new Intl.DateTimeFormat('pt-BR', {
@@ -76,31 +58,66 @@ function partesFuso(date, parts) {
   }).formatToParts(date);
 }
 
-function formatoDia(date) {
-  const p = partesFuso(date, { day: '2-digit', month: '2-digit' });
-  const dia = p.find(x => x.type === 'day').value;
-  const mes = p.find(x => x.type === 'month').value;
-  return `${Number(dia)}/${Number(mes)}`;
+function valorParte(parts, type) {
+  return parts.find(x => x.type === type).value;
 }
 
-function formatoSemana(date) {
-  const p = partesFuso(date, { day: '2-digit', month: '2-digit' });
-  const dia = p.find(x => x.type === 'day').value;
-  const mes = p.find(x => x.type === 'month').value;
-  return `${Number(dia)}/${Number(mes)}`;
+/** Hoje no calendário de São Paulo, representado como meio-dia UTC. */
+function hojeCalendario() {
+  const p = partesFuso(new Date(), { year: 'numeric', month: '2-digit', day: '2-digit' });
+  return new Date(Date.UTC(
+    Number(valorParte(p, 'year')),
+    Number(valorParte(p, 'month')) - 1,
+    Number(valorParte(p, 'day')),
+    12
+  ));
 }
 
-function formatoMes(date) {
-  const p = partesFuso(date, { month: '2-digit' });
-  const mesNum = Number(p.find(x => x.type === 'month').value);
-  return MESES_PT[mesNum - 1];
+/** Converte um instante para a data civil de São Paulo, sem virar o dia. */
+function dataLocalComoUtc(date) {
+  const p = partesFuso(date, { year: 'numeric', month: '2-digit', day: '2-digit' });
+  return new Date(Date.UTC(
+    Number(valorParte(p, 'year')),
+    Number(valorParte(p, 'month')) - 1,
+    Number(valorParte(p, 'day')),
+    12
+  ));
+}
+
+/** Chaves de agrupamento — sempre calculadas no fuso do painel. */
+function chaveDiaLocal(date) {
+  return dataLocalComoUtc(date).toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+function chaveSemanaLocal(date) {
+  const d = dataLocalComoUtc(date);
+  const diaSemana = d.getUTCDay() || 7; // 1=seg ... 7=dom
+  d.setUTCDate(d.getUTCDate() - (diaSemana - 1)); // segunda-feira da semana
+  return d.toISOString().slice(0, 10);
+}
+
+function chaveMesLocal(date) {
+  const d = dataLocalComoUtc(date);
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+/** Rótulos curtos, derivados da própria chave (sem depender do fuso). */
+function rotuloDia(chave) {
+  const d = new Date(chave + 'T12:00:00Z');
+  return `${d.getUTCDate()}/${d.getUTCMonth() + 1}`;
+}
+
+function rotuloSemana(chave) { return rotuloDia(chave); }
+
+function rotuloMes(chave) {
+  return MESES_PT[Number(chave.slice(5)) - 1];
 }
 
 /* ---------- Agregações ---------- */
 function agrupar(eventos, chaveFn) {
   const grupos = {};
   for (const e of eventos) {
-    const local = paraFusoPainel(e.evento_em);
+    const local = new Date(e.evento_em);
     const chave = chaveFn(local);
     if (!grupos[chave]) grupos[chave] = { papel: 0, plastico: 0, vidro: 0 };
     grupos[chave].papel += e.papel || 0;
@@ -113,16 +130,16 @@ function agrupar(eventos, chaveFn) {
 function somaGrupo(g) { return (g && g.papel ? g.papel : 0) + (g && g.plastico ? g.plastico : 0) + (g && g.vidro ? g.vidro : 0); }
 
 function serieDiaria(eventos, dias = 7) {
-  const grupos = agrupar(eventos, formatoDia);
-  const agora = agoraUtc();
+  const grupos = agrupar(eventos, chaveDiaLocal);
+  const hoje = hojeCalendario();
   const serie = [];
   for (let i = dias - 1; i >= 0; i--) {
-    const d = new Date(agora);
+    const d = new Date(hoje);
     d.setUTCDate(d.getUTCDate() - i);
-    const chave = formatoDia(d);
+    const chave = d.toISOString().slice(0, 10);
     const g = grupos[chave] || {};
     serie.push({
-      label: chave,
+      label: rotuloDia(chave),
       un: somaGrupo(g),
       papel: g.papel || 0,
       plastico: g.plastico || 0,
@@ -133,19 +150,20 @@ function serieDiaria(eventos, dias = 7) {
 }
 
 function serieSemanal(eventos, semanas = 5) {
-  const grupos = agrupar(eventos, formatoSemana);
-  const agora = agoraUtc();
+  const grupos = agrupar(eventos, chaveSemanaLocal);
+  const hoje = hojeCalendario();
+  const diaSemana = hoje.getUTCDay() || 7;
+  const segunda = new Date(hoje);
+  segunda.setUTCDate(segunda.getUTCDate() - (diaSemana - 1));
+
   const serie = [];
   for (let i = semanas - 1; i >= 0; i--) {
-    const d = new Date(agora);
-    // Segunda-feira desta semana
-    const diaSemana = d.getUTCDay(); // 0=dom, 1=seg...
-    const offset = (diaSemana === 0 ? -6 : 1 - diaSemana);
-    d.setUTCDate(d.getUTCDate() + offset - i * 7);
-    const chave = formatoSemana(d);
+    const d = new Date(segunda);
+    d.setUTCDate(d.getUTCDate() - i * 7);
+    const chave = d.toISOString().slice(0, 10); // segunda-feira da semana
     const g = grupos[chave] || {};
     serie.push({
-      label: chave,
+      label: rotuloSemana(chave),
       un: somaGrupo(g),
       papel: g.papel || 0,
       plastico: g.plastico || 0,
@@ -156,15 +174,15 @@ function serieSemanal(eventos, semanas = 5) {
 }
 
 function serieMensal(eventos, meses = 6) {
-  const grupos = agrupar(eventos, formatoMes);
-  const agora = agoraUtc();
+  const grupos = agrupar(eventos, chaveMesLocal);
+  const hoje = hojeCalendario();
   const serie = [];
   for (let i = meses - 1; i >= 0; i--) {
-    const d = new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth() - i, 1));
-    const chave = formatoMes(d);
+    const d = new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth() - i, 1, 12));
+    const chave = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
     const g = grupos[chave] || {};
     serie.push({
-      label: chave,
+      label: rotuloMes(chave),
       un: somaGrupo(g),
       papel: g.papel || 0,
       plastico: g.plastico || 0,
@@ -175,11 +193,11 @@ function serieMensal(eventos, meses = 6) {
 }
 
 function variacaoMensal(eventos) {
-  const grupos = agrupar(eventos, formatoMes);
-  const agora = agoraUtc();
-  const atual = somaGrupo(grupos[formatoMes(agora)] || {});
-  const mesAnterior = new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth() - 1, 1));
-  const anterior = somaGrupo(grupos[formatoMes(mesAnterior)] || {});
+  const grupos = agrupar(eventos, chaveMesLocal);
+  const hoje = hojeCalendario();
+  const atual = somaGrupo(grupos[chaveMesLocal(hoje)] || {});
+  const mesAnterior = new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth() - 1, 1, 12));
+  const anterior = somaGrupo(grupos[chaveMesLocal(mesAnterior)] || {});
   if (anterior <= 0) return null;
   return Math.round(((atual - anterior) / anterior) * 100 * 10) / 10;
 }
@@ -197,7 +215,7 @@ function gerarRegistros(eventos) {
   const registros = [];
   for (let i = eventos.length - 1; i >= 0; i--) {
     const e = eventos[i];
-    const local = paraFusoPainel(e.evento_em);
+    const local = new Date(e.evento_em);
     const p = partesFuso(local, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
     const dia = p.find(x => x.type === 'day').value;
     const mes = p.find(x => x.type === 'month').value;
