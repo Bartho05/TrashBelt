@@ -420,12 +420,17 @@ function gerarRegistros(array $eventos): array
     return $registros;
 }
 
+// Sem leitura da esteira por 5 minutos, o monitoramento é dado como desligado.
+// Isso é apenas um estado derivado da idade de updated_at: os contadores
+// acumulados em trash_belt_status não são alterados.
+define('TB_STALE_MINUTOS', 5);
+
 function statusSensores(?int $minutos): ?array
 {
     if ($minutos === null) {
         return null;
     }
-    if ($minutos < 15) {
+    if ($minutos < TB_STALE_MINUTOS) {
         return [
             'coletaUnHora' => null,
             'esteira'      => 'Operando',
@@ -434,21 +439,12 @@ function statusSensores(?int $minutos): ?array
             'manutencao'   => 'Nenhuma pendência',
         ];
     }
-    if ($minutos < 60 * 24) {
-        return [
-            'coletaUnHora' => null,
-            'esteira'      => 'Parada',
-            'separacao'    => 'Parada',
-            'coleta'       => 'Aguardando',
-            'manutencao'   => 'Nenhuma pendência',
-        ];
-    }
     return [
-        'coletaUnHora' => null,
-        'esteira'      => 'Inativa',
-        'separacao'    => 'Inativa',
-        'coleta'       => 'Inativa',
-        'manutencao'   => 'Aguardando revisão',
+        'coletaUnHora' => 0,
+        'esteira'      => 'Desligado',
+        'separacao'    => 'Desligado',
+        'coleta'       => 'Desligado',
+        'manutencao'   => 'Sem dados',
     ];
 }
 
@@ -497,7 +493,7 @@ try {
         }
     }
     $sensores = statusSensores($minutosDesdeLeitura);
-    if ($sensores !== null) {
+    if ($sensores !== null && $minutosDesdeLeitura !== null && $minutosDesdeLeitura < TB_STALE_MINUTOS) {
         $sensores['coletaUnHora'] = round(unidadesUltimas24h($eventos) / 24, 1);
     }
 

@@ -239,15 +239,16 @@ function gerarRegistros(eventos) {
   return registros;
 }
 
+// Sem leitura da esteira por 5 minutos, o monitoramento é dado como desligado.
+// Estado derivado da idade de updated_at — os contadores do ESP32 não mudam.
+const STALE_MINUTOS = 5;
+
 function statusSensores(minutosDesdeLeitura) {
   if (minutosDesdeLeitura == null) return null;
-  if (minutosDesdeLeitura < 15) {
+  if (minutosDesdeLeitura < STALE_MINUTOS) {
     return { coletaUnHora: null, esteira: 'Operando', separacao: 'Ativa', coleta: 'Coletando', manutencao: 'Nenhuma pendência' };
   }
-  if (minutosDesdeLeitura < 60 * 24) {
-    return { coletaUnHora: null, esteira: 'Parada', separacao: 'Parada', coleta: 'Aguardando', manutencao: 'Nenhuma pendência' };
-  }
-  return { coletaUnHora: null, esteira: 'Inativa', separacao: 'Inativa', coleta: 'Inativa', manutencao: 'Aguardando revisão' };
+  return { coletaUnHora: 0, esteira: 'Desligado', separacao: 'Desligado', coleta: 'Desligado', manutencao: 'Sem dados' };
 }
 
 /* ---------- Handler principal ---------- */
@@ -286,7 +287,7 @@ module.exports = async function handler(req, res) {
       } catch (_) { minutosDesdeLeitura = null; }
     }
     const sensores = statusSensores(minutosDesdeLeitura);
-    if (sensores) {
+    if (sensores && minutosDesdeLeitura != null && minutosDesdeLeitura < STALE_MINUTOS) {
       sensores.coletaUnHora = Math.round(unidadesUltimas24h(eventos) / 24 * 10) / 10;
     }
 
